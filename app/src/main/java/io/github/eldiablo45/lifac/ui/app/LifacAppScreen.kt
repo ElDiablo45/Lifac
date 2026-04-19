@@ -64,6 +64,11 @@ fun LifacAppScreen(
     onPickClientForDraft: (String) -> Unit,
     onOpenClientsForDraft: () -> Unit,
     onReturnToDraftEditor: () -> Unit,
+    onDraftIssueDateChanged: (String) -> Unit,
+    onDraftOperationDateChanged: (String) -> Unit,
+    onDraftProjectLabelChanged: (String) -> Unit,
+    onDraftNotesChanged: (String) -> Unit,
+    onSaveDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -181,6 +186,11 @@ fun LifacAppScreen(
                     clients = uiState.clients,
                     onDraftClientSelected = onDraftClientSelected,
                     onOpenClientsForDraft = onOpenClientsForDraft,
+                    onDraftIssueDateChanged = onDraftIssueDateChanged,
+                    onDraftOperationDateChanged = onDraftOperationDateChanged,
+                    onDraftProjectLabelChanged = onDraftProjectLabelChanged,
+                    onDraftNotesChanged = onDraftNotesChanged,
+                    onSaveDraft = onSaveDraft,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -270,7 +280,7 @@ private fun HomeScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Persistir clientes y borradores de factura para que este shell deje de depender de datos de ejemplo.",
+                        text = "Conectar conceptos reales al editor y persistir lineas para acercar el flujo a una factura util de extremo a extremo.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -657,6 +667,11 @@ private fun InvoiceEditorScreen(
     clients: List<ClientListItemUiState>,
     onDraftClientSelected: (String) -> Unit,
     onOpenClientsForDraft: () -> Unit,
+    onDraftIssueDateChanged: (String) -> Unit,
+    onDraftOperationDateChanged: (String) -> Unit,
+    onDraftProjectLabelChanged: (String) -> Unit,
+    onDraftNotesChanged: (String) -> Unit,
+    onSaveDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -681,9 +696,16 @@ private fun InvoiceEditorScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Este flujo todavia usa datos de ejemplo, pero ya enseña la secuencia real del MVP para que puedas validarla en movil.",
+                        text = "Este flujo ya combina cliente real y borrador local, mientras conceptos, impuestos avanzados y PDF siguen en evolucion.",
                         style = MaterialTheme.typography.bodyLarge,
                     )
+                    if (draft.hasPersistedDraft) {
+                        Text(
+                            text = "Borrador local cargado",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }
@@ -741,9 +763,28 @@ private fun InvoiceEditorScreen(
             ) {
                 EditorField("Serie", draft.selectedSeries)
                 EditorField("Numero autogenerado", draft.nextNumberPreview)
-                EditorField("Fecha de emision", draft.issueDate)
-                EditorField("Fecha de operacion", draft.operationDate)
-                EditorField("Obra o referencia", draft.projectLabel)
+                OutlinedTextField(
+                    value = draft.issueDate,
+                    onValueChange = onDraftIssueDateChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Fecha de emision") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = draft.operationDate,
+                    onValueChange = onDraftOperationDateChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Fecha de operacion") },
+                    placeholder = { Text("Placeholder: misma fecha por ahora") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = draft.projectLabel,
+                    onValueChange = onDraftProjectLabelChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Obra o referencia") },
+                    placeholder = { Text("Placeholder: nombre de obra o referencia") },
+                )
             }
         }
 
@@ -800,7 +841,13 @@ private fun InvoiceEditorScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                EditorField("Observaciones", draft.notes)
+                OutlinedTextField(
+                    value = draft.notes,
+                    onValueChange = onDraftNotesChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Observaciones") },
+                    placeholder = { Text("Placeholder: nota legal o comentario final") },
+                )
             }
         }
 
@@ -816,11 +863,7 @@ private fun InvoiceEditorScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        FilledTonalButton(
-                            onClick = {
-                                onPlaceholderAction("Guardar borrador sera la primera funcion real de persistencia.")
-                            },
-                        ) {
+                        FilledTonalButton(onClick = onSaveDraft) {
                             Text("Guardar borrador")
                         }
                         OutlinedButton(
@@ -1037,6 +1080,11 @@ private fun LifacAppScreenPreview() {
             onPickClientForDraft = {},
             onOpenClientsForDraft = {},
             onReturnToDraftEditor = {},
+            onDraftIssueDateChanged = {},
+            onDraftOperationDateChanged = {},
+            onDraftProjectLabelChanged = {},
+            onDraftNotesChanged = {},
+            onSaveDraft = {},
             onPlaceholderAction = {},
         )
     }

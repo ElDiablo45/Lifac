@@ -10,6 +10,9 @@ import io.github.eldiablo45.lifac.data.client.ClientRepository
 import io.github.eldiablo45.lifac.data.client.ClientType
 import io.github.eldiablo45.lifac.data.client.RoomClientRepository
 import io.github.eldiablo45.lifac.data.client.StoredClient
+import io.github.eldiablo45.lifac.data.draft.DraftRepository
+import io.github.eldiablo45.lifac.data.draft.RoomDraftRepository
+import io.github.eldiablo45.lifac.data.draft.StoredInvoiceDraft
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,22 +26,31 @@ import kotlinx.coroutines.launch
 
 class LifacAppViewModel(
     private val clientRepository: ClientRepository,
+    private val draftRepository: DraftRepository,
 ) : ViewModel() {
     private val currentSection = MutableStateFlow(LifacSection.HOME)
     private val clientForm = MutableStateFlow(ClientFormUiState())
-    private val selectedDraftClientId = MutableStateFlow<String?>(null)
+    private val draftForm = MutableStateFlow(defaultDraftForm())
     private val pickingClientForDraft = MutableStateFlow(false)
     private val events = MutableSharedFlow<String>()
 
     val uiEvents = events.asSharedFlow()
 
+    init {
+        viewModelScope.launch {
+            draftRepository.getActiveDraft()?.let { storedDraft ->
+                draftForm.value = storedDraft.toDraftFormState()
+            }
+        }
+    }
+
     val uiState: StateFlow<LifacAppUiState> = combine(
         currentSection,
         clientRepository.observeClients(),
         clientForm,
-        selectedDraftClientId,
+        draftForm,
         pickingClientForDraft,
-    ) { section, storedClients, form, draftClientId, isPickingClientForDraft ->
+    ) { section, storedClients, form, draft, isPickingClientForDraft ->
         val mappedClients = storedClients.map { storedClient ->
             ClientListItemUiState(
                 id = storedClient.id,
@@ -53,7 +65,7 @@ class LifacAppViewModel(
                 notes = storedClient.notes,
             )
         }
-        val selectedClient = mappedClients.firstOrNull { it.id == draftClientId }
+        val selectedClient = mappedClients.firstOrNull { it.id == draft.selectedClientId }
 
         LifacAppUiState(
             currentSection = section,
@@ -69,7 +81,15 @@ class LifacAppViewModel(
                     availableClientCount = storedClients.size,
                 ),
                 selectedClientMeta = buildDraftClientMeta(selectedClient),
+                selectedSeries = draft.selectedSeries,
+                nextNumberPreview = draft.nextNumberPreview,
+                issueDate = draft.issueDate,
+                operationDate = draft.operationDate,
+                projectLabel = draft.projectLabel,
+                notes = draft.notes,
+                taxMode = draft.taxMode,
                 concepts = sampleDraftConcepts,
+                hasPersistedDraft = draft.hasPersistedDraft,
             ),
             clientForm = form,
             isPickingClientForDraft = isPickingClientForDraft,
@@ -82,7 +102,10 @@ class LifacAppViewModel(
             invoices = sampleInvoices,
             concepts = sampleConcepts,
             series = sampleSeries,
-            draft = InvoiceDraftUiState(concepts = sampleDraftConcepts),
+            draft = InvoiceDraftUiState(
+                concepts = sampleDraftConcepts,
+                hasPersistedDraft = false,
+            ),
             clientForm = ClientFormUiState(),
         ),
     )
@@ -105,11 +128,11 @@ class LifacAppViewModel(
     }
 
     fun selectDraftClient(clientId: String) {
-        selectedDraftClientId.value = clientId
+        draftForm.update { current -> current.copy(selectedClientId = clientId) }
     }
 
     fun pickClientAndReturnToDraft(clientId: String) {
-        selectedDraftClientId.value = clientId
+        draftForm.update { current -> current.copy(selectedClientId = clientId) }
         pickingClientForDraft.value = false
         navigateTo(LifacSection.INVOICE_EDITOR)
     }
@@ -129,6 +152,22 @@ class LifacAppViewModel(
 
     fun updateClientKind(kind: ClientType) {
         clientForm.update { current -> current.copy(kind = kind) }
+    }
+
+    fun updateDraftIssueDate(value: String) {
+        draftForm.update { current -> current.copy(issueDate = value) }
+    }
+
+    fun updateDraftOperationDate(value: String) {
+        draftForm.update { current -> current.copy(operationDate = value) }
+    }
+
+    fun updateDraftProjectLabel(value: String) {
+        draftForm.update { current -> current.copy(projectLabel = value) }
+    }
+
+    fun updateDraftNotes(value: String) {
+        draftForm.update { current -> current.copy(notes = value) }
     }
 
     fun updateClientDisplayName(value: String) {
@@ -180,7 +219,7 @@ class LifacAppViewModel(
                 ),
             )
             if (pickingClientForDraft.value) {
-                selectedDraftClientId.value = newClientId
+                draftForm.update { current -> current.copy(selectedClientId = newClientId) }
                 pickingClientForDraft.value = false
                 currentSection.value = LifacSection.INVOICE_EDITOR
             }
@@ -195,6 +234,16 @@ class LifacAppViewModel(
         }
     }
 
+    fun saveDraft() {
+        val draftToSave = draftForm.value.normalized()
+
+        viewModelScope.launch {
+            draftRepository.upsertActiveDraft(draftToSave.toStoredDraft())
+            draftForm.value = draftToSave.copy(hasPersistedDraft = true)
+            events.emit("Borrador guardado localmente.")
+        }
+    }
+
     companion object {
         fun provideFactory(context: Context): ViewModelProvider.Factory {
             val appContext = context.applicationContext
@@ -202,6 +251,7 @@ class LifacAppViewModel(
                 initializer {
                     LifacAppViewModel(
                         clientRepository = RoomClientRepository.from(appContext),
+                        draftRepository = RoomDraftRepository.from(appContext),
                     )
                 }
             }
@@ -279,6 +329,20 @@ class LifacAppViewModel(
     }
 }
 
+internal data class InvoiceDraftFormState(
+    val selectedClientId: String? = null,
+    val selectedSeries: String = "2026",
+    val nextNumberPreview: String = "2026-0008",
+    val issueDate: String = "19/04/2026",
+    val operationDate: String = "",
+    val projectLabel: String = "",
+    val notes: String = "",
+    val taxMode: String = "IVA 21%",
+    val hasPersistedDraft: Boolean = false,
+)
+
+private fun defaultDraftForm(): InvoiceDraftFormState = InvoiceDraftFormState()
+
 internal fun validateClientForm(form: ClientFormUiState): String? {
     return if (form.displayName.isBlank()) {
         "El nombre del cliente es obligatorio."
@@ -294,6 +358,42 @@ private fun ClientFormUiState.normalized(): ClientFormUiState {
         city = city.trim(),
         address = address.trim(),
         notes = notes.trim(),
+    )
+}
+
+private fun InvoiceDraftFormState.normalized(): InvoiceDraftFormState {
+    return copy(
+        issueDate = issueDate.trim(),
+        operationDate = operationDate.trim(),
+        projectLabel = projectLabel.trim(),
+        notes = notes.trim(),
+    )
+}
+
+private fun InvoiceDraftFormState.toStoredDraft(): StoredInvoiceDraft {
+    return StoredInvoiceDraft(
+        selectedClientId = selectedClientId,
+        selectedSeries = selectedSeries,
+        nextNumberPreview = nextNumberPreview,
+        issueDate = issueDate,
+        operationDate = operationDate,
+        projectLabel = projectLabel,
+        notes = notes,
+        taxMode = taxMode,
+    )
+}
+
+internal fun StoredInvoiceDraft.toDraftFormState(): InvoiceDraftFormState {
+    return InvoiceDraftFormState(
+        selectedClientId = selectedClientId,
+        selectedSeries = selectedSeries,
+        nextNumberPreview = nextNumberPreview,
+        issueDate = issueDate,
+        operationDate = operationDate,
+        projectLabel = projectLabel,
+        notes = notes,
+        taxMode = taxMode,
+        hasPersistedDraft = true,
     )
 }
 

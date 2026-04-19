@@ -55,6 +55,11 @@ fun LifacApp(
             onPickClientForDraft = viewModel::pickClientAndReturnToDraft,
             onOpenClientsForDraft = viewModel::openClientsForDraft,
             onReturnToDraftEditor = viewModel::returnToDraftEditor,
+            onDraftIssueDateChanged = viewModel::updateDraftIssueDate,
+            onDraftOperationDateChanged = viewModel::updateDraftOperationDate,
+            onDraftProjectLabelChanged = viewModel::updateDraftProjectLabel,
+            onDraftNotesChanged = viewModel::updateDraftNotes,
+            onSaveDraft = viewModel::saveDraft,
             onPlaceholderAction = { message ->
                 scope.launch {
                     snackbarHostState.showSnackbar(message)

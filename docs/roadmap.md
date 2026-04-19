@@ -18,6 +18,7 @@
 - [x] Primera capacidad real persistida: alta y listado local de clientes.
 - [x] Conexion de `Nueva factura` con clientes reales guardados.
 - [x] Flujo util entre `Nueva factura` y `Clientes` para seleccionar cliente sin salir del contexto.
+- [x] Persistencia local del primer borrador activo de factura.
 
 ## En curso
 
@@ -65,4 +66,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Persistir el primer borrador de factura o conectar conceptos reales al editor.
+- [ ] Conectar conceptos reales al editor o persistir lineas de borrador.

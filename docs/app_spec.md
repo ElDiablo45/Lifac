@@ -307,4 +307,5 @@ Estado actual de validacion:
 - `Clientes` ya funciona con persistencia local real.
 - `Nueva factura` ya puede seleccionar clientes reales guardados.
 - El flujo de cliente ya permite saltar a `Clientes` y regresar al borrador con la seleccion aplicada.
+- `Nueva factura` ya guarda y recarga un borrador activo local con campos principales.
 - La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.

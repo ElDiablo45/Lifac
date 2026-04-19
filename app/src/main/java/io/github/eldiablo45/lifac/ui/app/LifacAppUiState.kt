@@ -91,6 +91,7 @@ data class InvoiceDraftUiState(
     val notes: String = "Placeholder: nota legal o comentario final",
     val taxMode: String = "IVA 21%",
     val concepts: List<DraftConceptUiState> = emptyList(),
+    val hasPersistedDraft: Boolean = false,
 )
 
 data class DraftConceptUiState(
