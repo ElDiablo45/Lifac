@@ -58,7 +58,15 @@ fun LifacApp(
             onDraftIssueDateChanged = viewModel::updateDraftIssueDate,
             onDraftOperationDateChanged = viewModel::updateDraftOperationDate,
             onDraftProjectLabelChanged = viewModel::updateDraftProjectLabel,
+            onDraftTaxModeChanged = viewModel::updateDraftTaxMode,
             onDraftNotesChanged = viewModel::updateDraftNotes,
+            onDraftLineDescriptionChanged = viewModel::updateDraftLineDescription,
+            onDraftLineQuantityChanged = viewModel::updateDraftLineQuantity,
+            onDraftLineUnitPriceChanged = viewModel::updateDraftLineUnitPrice,
+            onSaveDraftLine = viewModel::saveDraftLine,
+            onEditDraftLine = viewModel::editDraftLine,
+            onRemoveDraftLine = viewModel::removeDraftLine,
+            onResetDraftLineEditor = viewModel::resetDraftLineEditor,
             onSaveDraft = viewModel::saveDraft,
             onPlaceholderAction = { message ->
                 scope.launch {

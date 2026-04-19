@@ -67,7 +67,15 @@ fun LifacAppScreen(
     onDraftIssueDateChanged: (String) -> Unit,
     onDraftOperationDateChanged: (String) -> Unit,
     onDraftProjectLabelChanged: (String) -> Unit,
+    onDraftTaxModeChanged: (String) -> Unit,
     onDraftNotesChanged: (String) -> Unit,
+    onDraftLineDescriptionChanged: (String) -> Unit,
+    onDraftLineQuantityChanged: (String) -> Unit,
+    onDraftLineUnitPriceChanged: (String) -> Unit,
+    onSaveDraftLine: () -> Unit,
+    onEditDraftLine: (String) -> Unit,
+    onRemoveDraftLine: (String) -> Unit,
+    onResetDraftLineEditor: () -> Unit,
     onSaveDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -189,7 +197,15 @@ fun LifacAppScreen(
                     onDraftIssueDateChanged = onDraftIssueDateChanged,
                     onDraftOperationDateChanged = onDraftOperationDateChanged,
                     onDraftProjectLabelChanged = onDraftProjectLabelChanged,
+                    onDraftTaxModeChanged = onDraftTaxModeChanged,
                     onDraftNotesChanged = onDraftNotesChanged,
+                    onDraftLineDescriptionChanged = onDraftLineDescriptionChanged,
+                    onDraftLineQuantityChanged = onDraftLineQuantityChanged,
+                    onDraftLineUnitPriceChanged = onDraftLineUnitPriceChanged,
+                    onSaveDraftLine = onSaveDraftLine,
+                    onEditDraftLine = onEditDraftLine,
+                    onRemoveDraftLine = onRemoveDraftLine,
+                    onResetDraftLineEditor = onResetDraftLineEditor,
                     onSaveDraft = onSaveDraft,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
@@ -670,7 +686,15 @@ private fun InvoiceEditorScreen(
     onDraftIssueDateChanged: (String) -> Unit,
     onDraftOperationDateChanged: (String) -> Unit,
     onDraftProjectLabelChanged: (String) -> Unit,
+    onDraftTaxModeChanged: (String) -> Unit,
     onDraftNotesChanged: (String) -> Unit,
+    onDraftLineDescriptionChanged: (String) -> Unit,
+    onDraftLineQuantityChanged: (String) -> Unit,
+    onDraftLineUnitPriceChanged: (String) -> Unit,
+    onSaveDraftLine: () -> Unit,
+    onEditDraftLine: (String) -> Unit,
+    onRemoveDraftLine: (String) -> Unit,
+    onResetDraftLineEditor: () -> Unit,
     onSaveDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -791,25 +815,86 @@ private fun InvoiceEditorScreen(
         item {
             EditorSectionCard(
                 title = "3. Conceptos",
-                subtitle = "Cada linea sigue siendo un concepto para mantener simplicidad.",
+                subtitle = "Las lineas ya se editan en local dentro del borrador activo.",
             ) {
-                draft.concepts.forEachIndexed { index, concept ->
-                    if (index > 0) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                if (draft.concepts.isEmpty()) {
+                    PlaceholderTag("Aun no hay lineas en este borrador.")
+                } else {
+                    draft.concepts.forEachIndexed { index, concept ->
+                        if (index > 0) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+                        }
+                        EditorField("Descripcion", concept.description)
+                        EditorField("Cantidad", concept.quantity)
+                        EditorField("Precio unitario", concept.unitPrice)
+                        EditorField("Impuesto", concept.taxLabel)
+                        EditorField("Total linea", concept.total)
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            FilledTonalButton(onClick = { onEditDraftLine(concept.id) }) {
+                                Text("Editar")
+                            }
+                            OutlinedButton(onClick = { onRemoveDraftLine(concept.id) }) {
+                                Text("Eliminar")
+                            }
+                        }
                     }
-                    EditorField("Descripcion", concept.description)
-                    EditorField("Cantidad", concept.quantity)
-                    EditorField("Precio unitario", concept.unitPrice)
-                    EditorField("Impuesto", concept.taxLabel)
-                    EditorField("Total linea", concept.total)
                 }
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = {
-                        onPlaceholderAction("Alta y edicion real de lineas llegara con persistencia de borradores.")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = if (draft.lineEditor.isEditing) {
+                        "Editar linea"
+                    } else {
+                        "Nueva linea"
                     },
-                ) {
-                    Text("Anadir concepto")
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                OutlinedTextField(
+                    value = draft.lineEditor.description,
+                    onValueChange = onDraftLineDescriptionChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Descripcion") },
+                    placeholder = { Text("Placeholder: mano de obra, material o servicio") },
+                )
+                OutlinedTextField(
+                    value = draft.lineEditor.quantity,
+                    onValueChange = onDraftLineQuantityChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Cantidad") },
+                    singleLine = true,
+                )
+                OutlinedTextField(
+                    value = draft.lineEditor.unitPrice,
+                    onValueChange = onDraftLineUnitPriceChanged,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Precio unitario") },
+                    placeholder = { Text("Ejemplo: 220,00") },
+                    singleLine = true,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = draft.lineEditor.taxMode == "IVA 21%",
+                        onClick = { onDraftTaxModeChanged("IVA 21%") },
+                        label = { Text("IVA 21%") },
+                    )
+                    FilterChip(
+                        selected = draft.lineEditor.taxMode == "IVA 10%",
+                        onClick = { onDraftTaxModeChanged("IVA 10%") },
+                        label = { Text("IVA 10%") },
+                    )
+                    FilterChip(
+                        selected = draft.lineEditor.taxMode == "ISP",
+                        onClick = { onDraftTaxModeChanged("ISP") },
+                        label = { Text("ISP") },
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FilledTonalButton(onClick = onSaveDraftLine) {
+                        Text(draft.lineEditor.actionLabel)
+                    }
+                    OutlinedButton(onClick = onResetDraftLineEditor) {
+                        Text("Limpiar linea")
+                    }
                 }
             }
         }
@@ -817,29 +902,29 @@ private fun InvoiceEditorScreen(
         item {
             EditorSectionCard(
                 title = "4. Impuestos y observaciones",
-                subtitle = "Con placeholders claros donde aun faltan decisiones cerradas.",
+                subtitle = "Modo fiscal por defecto del borrador y resumen calculado.",
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
-                        selected = true,
-                        onClick = {},
-                        label = { Text(draft.taxMode) },
+                        selected = draft.taxMode == "IVA 21%",
+                        onClick = { onDraftTaxModeChanged("IVA 21%") },
+                        label = { Text("IVA 21%") },
                     )
                     FilterChip(
-                        selected = false,
-                        onClick = {
-                            onPlaceholderAction("El selector fiscal definitivo se cerrara al validar el caso de construccion.")
-                        },
+                        selected = draft.taxMode == "IVA 10%",
+                        onClick = { onDraftTaxModeChanged("IVA 10%") },
                         label = { Text("IVA 10%") },
                     )
                     FilterChip(
-                        selected = false,
-                        onClick = {
-                            onPlaceholderAction("Inversion del sujeto pasivo queda preparada, pero aun no cerrada.")
-                        },
+                        selected = draft.taxMode == "ISP",
+                        onClick = { onDraftTaxModeChanged("ISP") },
                         label = { Text("ISP") },
                     )
                 }
+                Spacer(modifier = Modifier.height(12.dp))
+                EditorField("Subtotal", draft.subtotal)
+                EditorField("Impuestos", draft.taxTotal)
+                EditorField("Total", draft.grandTotal)
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedTextField(
                     value = draft.notes,
@@ -868,7 +953,7 @@ private fun InvoiceEditorScreen(
                         }
                         OutlinedButton(
                             onClick = {
-                                onPlaceholderAction("La generacion real de PDF se implementara sobre este flujo.")
+                                onPlaceholderAction("La generacion real de PDF se apoyara en estas lineas y totales persistidos.")
                             },
                         ) {
                             Text("Generar PDF")
@@ -1054,6 +1139,7 @@ private fun LifacAppScreenPreview() {
                     selectedClientMeta = "Empresa · B00000000 · Madrid",
                     concepts = listOf(
                         DraftConceptUiState(
+                            id = "line-preview",
                             description = "Demolicion interior",
                             quantity = "1",
                             unitPrice = "600,00 EUR",
@@ -1083,7 +1169,15 @@ private fun LifacAppScreenPreview() {
             onDraftIssueDateChanged = {},
             onDraftOperationDateChanged = {},
             onDraftProjectLabelChanged = {},
+            onDraftTaxModeChanged = {},
             onDraftNotesChanged = {},
+            onDraftLineDescriptionChanged = {},
+            onDraftLineQuantityChanged = {},
+            onDraftLineUnitPriceChanged = {},
+            onSaveDraftLine = {},
+            onEditDraftLine = {},
+            onRemoveDraftLine = {},
+            onResetDraftLineEditor = {},
             onSaveDraft = {},
             onPlaceholderAction = {},
         )

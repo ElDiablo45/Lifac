@@ -17,9 +17,11 @@ Este archivo es el indice operativo del repositorio. Define el orden de lectura,
 - Repositorio Android inicializado con modulo `app`.
 - Stack base confirmado: Kotlin, Jetpack Compose, Material 3, Gradle Kotlin DSL y version catalog.
 - Wrapper de Gradle incluido en el repo.
-- Existe una primera pantalla `Hello World` como bootstrap funcional.
+- La app ya no esta en `Hello World`; existe un shell navegable del MVP.
 - Estado base validado en Android Studio y ejecutado correctamente en un movil real.
 - El estado actual incluye ajustes aplicados por Android Studio al tooling del proyecto.
+- `Clientes` ya persiste datos reales en Room.
+- `Nueva factura` ya reutiliza clientes reales y puede guardar un borrador activo local.
 
 ## Reglas operativas del proyecto
 

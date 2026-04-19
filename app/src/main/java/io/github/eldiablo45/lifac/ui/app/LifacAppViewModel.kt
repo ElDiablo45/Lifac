@@ -12,7 +12,10 @@ import io.github.eldiablo45.lifac.data.client.RoomClientRepository
 import io.github.eldiablo45.lifac.data.client.StoredClient
 import io.github.eldiablo45.lifac.data.draft.DraftRepository
 import io.github.eldiablo45.lifac.data.draft.RoomDraftRepository
+import io.github.eldiablo45.lifac.data.draft.StoredDraftBundle
+import io.github.eldiablo45.lifac.data.draft.StoredDraftLine
 import io.github.eldiablo45.lifac.data.draft.StoredInvoiceDraft
+import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,6 +69,10 @@ class LifacAppViewModel(
             )
         }
         val selectedClient = mappedClients.firstOrNull { it.id == draft.selectedClientId }
+        val draftLines = draft.lines
+            .sortedBy { it.sortOrder }
+            .map { line -> line.toUiState() }
+        val totals = calculateDraftTotals(draft.lines)
 
         LifacAppUiState(
             currentSection = section,
@@ -88,7 +95,22 @@ class LifacAppViewModel(
                 projectLabel = draft.projectLabel,
                 notes = draft.notes,
                 taxMode = draft.taxMode,
-                concepts = sampleDraftConcepts,
+                concepts = draftLines,
+                lineEditor = DraftLineEditorUiState(
+                    isEditing = draft.lineEditor.editingLineId != null,
+                    description = draft.lineEditor.description,
+                    quantity = draft.lineEditor.quantity,
+                    unitPrice = draft.lineEditor.unitPrice,
+                    taxMode = draft.lineEditor.taxMode,
+                    actionLabel = if (draft.lineEditor.editingLineId == null) {
+                        "Anadir linea"
+                    } else {
+                        "Guardar cambios"
+                    },
+                ),
+                subtotal = formatCurrency(totals.subtotal),
+                taxTotal = formatCurrency(totals.taxTotal),
+                grandTotal = formatCurrency(totals.grandTotal),
                 hasPersistedDraft = draft.hasPersistedDraft,
             ),
             clientForm = form,
@@ -103,7 +125,11 @@ class LifacAppViewModel(
             concepts = sampleConcepts,
             series = sampleSeries,
             draft = InvoiceDraftUiState(
-                concepts = sampleDraftConcepts,
+                concepts = emptyList(),
+                lineEditor = DraftLineEditorUiState(),
+                subtotal = formatCurrency(0.0),
+                taxTotal = formatCurrency(0.0),
+                grandTotal = formatCurrency(0.0),
                 hasPersistedDraft = false,
             ),
             clientForm = ClientFormUiState(),
@@ -168,6 +194,124 @@ class LifacAppViewModel(
 
     fun updateDraftNotes(value: String) {
         draftForm.update { current -> current.copy(notes = value) }
+    }
+
+    fun updateDraftTaxMode(value: String) {
+        draftForm.update { current ->
+            current.copy(
+                taxMode = value,
+                lineEditor = current.lineEditor.copy(taxMode = value),
+            )
+        }
+    }
+
+    fun updateDraftLineDescription(value: String) {
+        draftForm.update { current ->
+            current.copy(
+                lineEditor = current.lineEditor.copy(description = value),
+            )
+        }
+    }
+
+    fun updateDraftLineQuantity(value: String) {
+        draftForm.update { current ->
+            current.copy(
+                lineEditor = current.lineEditor.copy(quantity = value),
+            )
+        }
+    }
+
+    fun updateDraftLineUnitPrice(value: String) {
+        draftForm.update { current ->
+            current.copy(
+                lineEditor = current.lineEditor.copy(unitPrice = value),
+            )
+        }
+    }
+
+    fun resetDraftLineEditor() {
+        draftForm.update { current ->
+            current.copy(
+                lineEditor = defaultDraftLineEditor(current.taxMode),
+            )
+        }
+    }
+
+    fun editDraftLine(lineId: String) {
+        draftForm.update { current ->
+            val selectedLine = current.lines.firstOrNull { it.id == lineId } ?: return@update current
+            current.copy(
+                taxMode = selectedLine.taxMode,
+                lineEditor = DraftLineEditorFormState(
+                    editingLineId = selectedLine.id,
+                    description = selectedLine.description,
+                    quantity = selectedLine.quantity,
+                    unitPrice = selectedLine.unitPrice,
+                    taxMode = selectedLine.taxMode,
+                ),
+            )
+        }
+    }
+
+    fun removeDraftLine(lineId: String) {
+        draftForm.update { current ->
+            val remainingLines = current.lines
+                .filterNot { it.id == lineId }
+                .reindexed()
+            val shouldResetEditor = current.lineEditor.editingLineId == lineId
+            current.copy(
+                lines = remainingLines,
+                lineEditor = if (shouldResetEditor) {
+                    defaultDraftLineEditor(current.taxMode)
+                } else {
+                    current.lineEditor
+                },
+            )
+        }
+        viewModelScope.launch {
+            events.emit("Linea eliminada del borrador.")
+        }
+    }
+
+    fun saveDraftLine() {
+        val normalizedState = draftForm.value.normalized()
+        val lineValidationError = validateDraftLineEditor(normalizedState.lineEditor)
+
+        if (lineValidationError != null) {
+            viewModelScope.launch {
+                events.emit(lineValidationError)
+            }
+            return
+        }
+
+        draftForm.value = run {
+            val lineEditor = normalizedState.lineEditor
+            val draftLine = DraftLineFormState(
+                id = lineEditor.editingLineId ?: UUID.randomUUID().toString(),
+                sortOrder = 0,
+                description = lineEditor.description,
+                quantity = lineEditor.quantity,
+                unitPrice = lineEditor.unitPrice,
+                taxMode = lineEditor.taxMode,
+            )
+            val mergedLines = if (lineEditor.editingLineId == null) {
+                normalizedState.lines + draftLine
+            } else {
+                normalizedState.lines.map { existingLine ->
+                    if (existingLine.id == lineEditor.editingLineId) draftLine else existingLine
+                }
+            }.reindexed()
+
+            normalizedState.copy(
+                taxMode = lineEditor.taxMode,
+                lines = mergedLines,
+                lineEditor = defaultDraftLineEditor(lineEditor.taxMode),
+            )
+        }
+
+        viewModelScope.launch {
+            events.emit("Linea guardada en el borrador.")
+        }
     }
 
     fun updateClientDisplayName(value: String) {
@@ -238,7 +382,10 @@ class LifacAppViewModel(
         val draftToSave = draftForm.value.normalized()
 
         viewModelScope.launch {
-            draftRepository.upsertActiveDraft(draftToSave.toStoredDraft())
+            draftRepository.upsertActiveDraft(
+                draft = draftToSave.toStoredDraft(),
+                lines = draftToSave.toStoredDraftLines(),
+            )
             draftForm.value = draftToSave.copy(hasPersistedDraft = true)
             events.emit("Borrador guardado localmente.")
         }
@@ -309,23 +456,6 @@ class LifacAppViewModel(
             SeriesListItemUiState(code = "2026", nextNumber = "0008"),
             SeriesListItemUiState(code = "OBRA", nextNumber = "0012"),
         )
-
-        private val sampleDraftConcepts = listOf(
-            DraftConceptUiState(
-                description = "Demolicion y retirada de escombros",
-                quantity = "1",
-                unitPrice = "600,00 EUR",
-                taxLabel = "IVA 21%",
-                total = "726,00 EUR",
-            ),
-            DraftConceptUiState(
-                description = "Suministro de material de agarre",
-                quantity = "8",
-                unitPrice = "22,50 EUR",
-                taxLabel = "IVA 21%",
-                total = "217,80 EUR",
-            ),
-        )
     }
 }
 
@@ -338,16 +468,52 @@ internal data class InvoiceDraftFormState(
     val projectLabel: String = "",
     val notes: String = "",
     val taxMode: String = "IVA 21%",
+    val lines: List<DraftLineFormState> = emptyList(),
+    val lineEditor: DraftLineEditorFormState = defaultDraftLineEditor(),
     val hasPersistedDraft: Boolean = false,
 )
 
+internal data class DraftLineFormState(
+    val id: String,
+    val sortOrder: Int,
+    val description: String,
+    val quantity: String,
+    val unitPrice: String,
+    val taxMode: String,
+)
+
+internal data class DraftLineEditorFormState(
+    val editingLineId: String? = null,
+    val description: String = "",
+    val quantity: String = "1",
+    val unitPrice: String = "",
+    val taxMode: String = "IVA 21%",
+)
+
+private data class DraftTotals(
+    val subtotal: Double,
+    val taxTotal: Double,
+    val grandTotal: Double,
+)
+
 private fun defaultDraftForm(): InvoiceDraftFormState = InvoiceDraftFormState()
+
+private fun defaultDraftLineEditor(taxMode: String = "IVA 21%"): DraftLineEditorFormState {
+    return DraftLineEditorFormState(taxMode = taxMode)
+}
 
 internal fun validateClientForm(form: ClientFormUiState): String? {
     return if (form.displayName.isBlank()) {
         "El nombre del cliente es obligatorio."
     } else {
         null
+    }
+}
+
+internal fun validateDraftLineEditor(editor: DraftLineEditorFormState): String? {
+    return when {
+        editor.description.isBlank() -> "La descripcion de la linea es obligatoria."
+        else -> null
     }
 }
 
@@ -367,6 +533,21 @@ private fun InvoiceDraftFormState.normalized(): InvoiceDraftFormState {
         operationDate = operationDate.trim(),
         projectLabel = projectLabel.trim(),
         notes = notes.trim(),
+        lines = lines
+            .map { line ->
+                line.copy(
+                    description = line.description.trim(),
+                    quantity = line.quantity.trim(),
+                    unitPrice = line.unitPrice.trim(),
+                )
+            }
+            .reindexed(),
+        lineEditor = lineEditor.copy(
+            description = lineEditor.description.trim(),
+            quantity = lineEditor.quantity.trim(),
+            unitPrice = lineEditor.unitPrice.trim(),
+            taxMode = lineEditor.taxMode.trim(),
+        ),
     )
 }
 
@@ -383,16 +564,48 @@ private fun InvoiceDraftFormState.toStoredDraft(): StoredInvoiceDraft {
     )
 }
 
-internal fun StoredInvoiceDraft.toDraftFormState(): InvoiceDraftFormState {
+private fun InvoiceDraftFormState.toStoredDraftLines(): List<StoredDraftLine> {
+    return lines
+        .reindexed()
+        .map { line ->
+            StoredDraftLine(
+                id = line.id,
+                sortOrder = line.sortOrder,
+                description = line.description,
+                quantity = line.quantity,
+                unitPrice = line.unitPrice,
+                taxMode = line.taxMode,
+            )
+        }
+}
+
+internal fun StoredDraftBundle.toDraftFormState(): InvoiceDraftFormState {
+    val normalizedLines = lines
+        .sortedBy { it.sortOrder }
+        .map { line ->
+            DraftLineFormState(
+                id = line.id,
+                sortOrder = line.sortOrder,
+                description = line.description,
+                quantity = line.quantity,
+                unitPrice = line.unitPrice,
+                taxMode = line.taxMode,
+            )
+        }
+        .reindexed()
+    val lastTaxMode = normalizedLines.lastOrNull()?.taxMode ?: draft.taxMode
+
     return InvoiceDraftFormState(
-        selectedClientId = selectedClientId,
-        selectedSeries = selectedSeries,
-        nextNumberPreview = nextNumberPreview,
-        issueDate = issueDate,
-        operationDate = operationDate,
-        projectLabel = projectLabel,
-        notes = notes,
-        taxMode = taxMode,
+        selectedClientId = draft.selectedClientId,
+        selectedSeries = draft.selectedSeries,
+        nextNumberPreview = draft.nextNumberPreview,
+        issueDate = draft.issueDate,
+        operationDate = draft.operationDate,
+        projectLabel = draft.projectLabel,
+        notes = draft.notes,
+        taxMode = draft.taxMode,
+        lines = normalizedLines,
+        lineEditor = defaultDraftLineEditor(lastTaxMode),
         hasPersistedDraft = true,
     )
 }
@@ -422,6 +635,73 @@ internal fun buildDraftClientMeta(
             append(selectedClient.city)
         }
     }
+}
+
+private fun DraftLineFormState.toUiState(): DraftConceptUiState {
+    val totals = calculateLineTotals(this)
+    return DraftConceptUiState(
+        id = id,
+        description = description,
+        quantity = quantity,
+        unitPrice = unitPrice.ifBlank { "0,00" },
+        taxLabel = taxMode,
+        total = formatCurrency(totals.lineTotal),
+    )
+}
+
+private fun calculateDraftTotals(lines: List<DraftLineFormState>): DraftTotals {
+    val lineTotals = lines.map(::calculateLineTotals)
+    return DraftTotals(
+        subtotal = lineTotals.sumOf { it.baseAmount },
+        taxTotal = lineTotals.sumOf { it.taxAmount },
+        grandTotal = lineTotals.sumOf { it.lineTotal },
+    )
+}
+
+private data class DraftLineTotals(
+    val baseAmount: Double,
+    val taxAmount: Double,
+    val lineTotal: Double,
+)
+
+private fun calculateLineTotals(line: DraftLineFormState): DraftLineTotals {
+    val quantity = parseDecimal(line.quantity).takeIf { it > 0 } ?: 0.0
+    val unitPrice = parseDecimal(line.unitPrice)
+    val baseAmount = quantity * unitPrice
+    val taxAmount = baseAmount * taxRateFor(line.taxMode)
+    return DraftLineTotals(
+        baseAmount = baseAmount,
+        taxAmount = taxAmount,
+        lineTotal = baseAmount + taxAmount,
+    )
+}
+
+private fun parseDecimal(rawValue: String): Double {
+    val trimmed = rawValue.trim()
+    val normalized = if (trimmed.contains(',')) {
+        trimmed
+            .replace(".", "")
+            .replace(',', '.')
+    } else {
+        trimmed
+    }
+    return normalized.toDoubleOrNull() ?: 0.0
+}
+
+private fun taxRateFor(taxMode: String): Double {
+    return when (taxMode) {
+        "IVA 10%" -> 0.10
+        "IVA 21%" -> 0.21
+        else -> 0.0
+    }
+}
+
+private fun formatCurrency(value: Double): String {
+    return String.format(Locale("es", "ES"), "%.2f EUR", value).replace('.', ',')
+}
+
+private fun List<DraftLineFormState>.reindexed(): List<DraftLineFormState> {
+    return mapIndexed { index, line -> line.copy(sortOrder = index) }
 }
 
 private fun clientKindLabel(kind: ClientKind): String = when (kind) {

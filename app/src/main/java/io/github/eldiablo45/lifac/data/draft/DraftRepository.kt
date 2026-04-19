@@ -16,8 +16,26 @@ data class StoredInvoiceDraft(
     }
 }
 
-interface DraftRepository {
-    suspend fun getActiveDraft(): StoredInvoiceDraft?
+data class StoredDraftLine(
+    val id: String,
+    val draftId: String = StoredInvoiceDraft.ACTIVE_DRAFT_ID,
+    val sortOrder: Int,
+    val description: String,
+    val quantity: String,
+    val unitPrice: String,
+    val taxMode: String,
+)
 
-    suspend fun upsertActiveDraft(draft: StoredInvoiceDraft)
+data class StoredDraftBundle(
+    val draft: StoredInvoiceDraft,
+    val lines: List<StoredDraftLine>,
+)
+
+interface DraftRepository {
+    suspend fun getActiveDraft(): StoredDraftBundle?
+
+    suspend fun upsertActiveDraft(
+        draft: StoredInvoiceDraft,
+        lines: List<StoredDraftLine>,
+    )
 }

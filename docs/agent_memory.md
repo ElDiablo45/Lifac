@@ -38,8 +38,10 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
   - PDF como salida final del flujo.
 - El estado actual de UI usa datos de ejemplo y placeholders intencionados en campos todavia no decididos.
 - El resto de secciones siguen usando datos de ejemplo, pero `Clientes` ya guarda datos reales en base local Room.
-- El flujo de borrador de factura ya persiste un borrador activo local y reutiliza clientes reales, aunque las lineas siguen siendo de ejemplo.
+- El flujo de borrador de factura ya persiste un borrador activo local, reutiliza clientes reales y ya no depende de lineas de ejemplo.
 - El borrador activo ya persiste cliente, fechas, obra o referencia y observaciones.
+- El editor de `Nueva factura` ya permite crear, editar y eliminar lineas reales dentro del borrador activo.
+- Las lineas del borrador ya se guardan localmente junto con el borrador activo y recalculan subtotal, impuestos y total.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -91,7 +93,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
 - El MVP debe contemplar clientes empresa y clientes particular.
 - La propuesta actual separa los datos del cliente segun tipo, pero mantiene un unico flujo de facturacion.
-- La siguiente iteracion con mas valor ahora es conectar conceptos reales al editor o persistir lineas de borrador.
+- La siguiente iteracion con mas valor ahora es persistir el catalogo real de conceptos y conectarlo al editor.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

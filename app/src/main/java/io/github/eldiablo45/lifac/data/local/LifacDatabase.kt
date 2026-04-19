@@ -8,8 +8,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [ClientEntity::class, InvoiceDraftEntity::class],
-    version = 2,
+    entities = [ClientEntity::class, InvoiceDraftEntity::class, DraftLineEntity::class],
+    version = 3,
     exportSchema = false,
 )
 abstract class LifacDatabase : RoomDatabase() {
@@ -41,13 +41,36 @@ abstract class LifacDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `draft_lines` (
+                        `id` TEXT NOT NULL,
+                        `draftId` TEXT NOT NULL,
+                        `sortOrder` INTEGER NOT NULL,
+                        `description` TEXT NOT NULL,
+                        `quantity` TEXT NOT NULL,
+                        `unitPrice` TEXT NOT NULL,
+                        `taxMode` TEXT NOT NULL,
+                        PRIMARY KEY(`id`),
+                        FOREIGN KEY(`draftId`) REFERENCES `invoice_drafts`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                    """.trimIndent(),
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_draft_lines_draftId` ON `draft_lines` (`draftId`)",
+                )
+            }
+        }
+
         fun getInstance(context: Context): LifacDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     LifacDatabase::class.java,
                     "lifac.db",
-                ).addMigrations(MIGRATION_1_2)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                     .also { INSTANCE = it }
             }

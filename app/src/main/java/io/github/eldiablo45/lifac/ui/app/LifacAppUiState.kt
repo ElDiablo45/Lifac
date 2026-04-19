@@ -91,13 +91,27 @@ data class InvoiceDraftUiState(
     val notes: String = "Placeholder: nota legal o comentario final",
     val taxMode: String = "IVA 21%",
     val concepts: List<DraftConceptUiState> = emptyList(),
+    val lineEditor: DraftLineEditorUiState = DraftLineEditorUiState(),
+    val subtotal: String = "0,00 EUR",
+    val taxTotal: String = "0,00 EUR",
+    val grandTotal: String = "0,00 EUR",
     val hasPersistedDraft: Boolean = false,
 )
 
 data class DraftConceptUiState(
+    val id: String,
     val description: String,
     val quantity: String,
     val unitPrice: String,
     val taxLabel: String,
     val total: String,
+)
+
+data class DraftLineEditorUiState(
+    val isEditing: Boolean = false,
+    val description: String = "",
+    val quantity: String = "1",
+    val unitPrice: String = "",
+    val taxMode: String = "IVA 21%",
+    val actionLabel: String = "Anadir linea",
 )
