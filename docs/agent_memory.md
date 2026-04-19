@@ -15,9 +15,10 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - `Lifac` se implementa como aplicacion Android nativa.
 - Plataforma objetivo inicial: Android 16, es decir API 36 para `compileSdk` y `targetSdk`.
 - `minSdk` inicial elegido: 29, como compromiso temporal entre base moderna y compatibilidad razonable.
-- Stack base: Kotlin, Jetpack Compose, Material 3, Gradle Kotlin DSL, version catalog y wrapper de Gradle.
+- Stack base: Kotlin integrado en AGP 9, Jetpack Compose, Material 3, Gradle Kotlin DSL, version catalog y wrapper de Gradle.
 - Arquitectura inicial recomendada: una sola `Activity`, UI en Compose, estado expuesto desde `ViewModel` y flujo de datos unidireccional.
 - Namespace y `applicationId` iniciales: `io.github.eldiablo45.lifac`.
+- Se elimina el plugin `org.jetbrains.kotlin.android` porque AGP 9 ya aporta soporte Kotlin integrado.
 - La documentacion base se actualiza antes de cambios estructurales relevantes.
 - El proyecto mantiene memoria persistente basada en `AGENTS.md`, `docs/agent_memory.md`, `docs/app_spec.md` y `docs/roadmap.md`.
 

@@ -37,6 +37,7 @@
 - Aplicacion Android con `compileSdk` y `targetSdk` 36.
 - `minSdk` inicial 29.
 - Kotlin como lenguaje principal.
+- Soporte Kotlin integrado en AGP 9, sin aplicar `org.jetbrains.kotlin.android`.
 - Compose como toolkit de UI recomendado por Google.
 - Material 3 para componentes y tema.
 - `ViewModel` y `StateFlow` para manejo de estado.
