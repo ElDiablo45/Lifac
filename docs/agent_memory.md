@@ -6,7 +6,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 
 - Repositorio inicializado para trabajo con memoria persistente.
 - A partir de esta conversacion, el proyecto pasa a definirse como una app Android nativa.
-- El siguiente hito operativo es bootstrapear una app minima funcional tipo `Hello World`.
+- El bootstrap Android actual ya es el estado base validado del proyecto.
 - El entorno de shell actual no expone `java` ni `gradle` en `PATH`, por lo que la validacion completa desde terminal puede depender de Android Studio.
 - El repo ya contiene bootstrap Android real con wrapper, modulo `app`, tests base y UI Compose inicial.
 - El bootstrap ya fue validado por el usuario en Android Studio y ejecutado con exito en un movil real.
@@ -14,6 +14,13 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 ## Decisiones activas
 
 - `Lifac` se implementa como aplicacion Android nativa.
+- Producto actual: app para generar facturas de la forma mas sencilla posible.
+- Enfoque de datos: local-first, sin backend y sin subir datos operativos del usuario a servidores propios.
+- Primer usuario objetivo: pequeno negocio, concretamente una pequena constructora.
+- Salida principal del sistema: factura completa en PDF.
+- El sistema debe incluir desde el inicio catalogo local de clientes y catalogo local de productos o conceptos.
+- Debe soportar facturas completas con datos fiscales, IVA, serie o numero y fecha.
+- Copias de seguridad exportables son deseables a futuro, con posibilidad prevista de backup a Google Drive.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -30,6 +37,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El estado base funcional incluye tambien el tema actual `android:Theme.DeviceDefault.NoActionBar`.
 - La documentacion base se actualiza antes de cambios estructurales relevantes.
 - El proyecto mantiene memoria persistente basada en `AGENTS.md`, `docs/agent_memory.md`, `docs/app_spec.md` y `docs/roadmap.md`.
+- La logica fiscal inicial no debe asumir un unico caso fijo de construccion; debe contemplar al menos IVA normal y dejar preparada una via para operaciones con inversion del sujeto pasivo.
 
 ## Restricciones acordadas
 
@@ -42,8 +50,8 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 
 ## Riesgos abiertos
 
-- El producto real aun no esta definido mas alla de ser una app Android nueva.
-- No hay informacion suficiente para fijar dominio de negocio, usuarios objetivo ni alcance funcional.
+- El producto real ya esta definido a alto nivel, pero faltan los detalles exactos del MVP.
+- El flujo fiscal de una pequena constructora puede no reducirse siempre a "solo IVA"; hay casos oficiales de inversion del sujeto pasivo en ejecuciones de obra.
 - La shell actual no expone JDK ni Gradle, por lo que el primer sync y algunas validaciones podrian depender de Android Studio.
 - La validacion CLI sigue pendiente en este entorno, aunque el usuario ya confirmo sync, build y ejecucion correctos desde Android Studio.
 
@@ -51,7 +59,8 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 
 - Este repositorio fue preparado explicitamente para trabajar con memoria persistente y coordinacion de agentes desde el inicio.
 - En esta conversacion se define por primera vez la direccion tecnica del proyecto: Android nativo moderno.
-- El objetivo inmediato es crear una base fresca, actual y duradera para Android 16 con un primer `Hello World`.
+- El objetivo de producto ahora es facturacion extremadamente simple para pequeno negocio.
+- El valor principal es rapidez, simplicidad y privacidad local.
 - La arquitectura debe mantenerse simple hasta que el producto real exija capas adicionales.
 - Este bootstrap ya debe considerarse el estado base estable desde el que arrancar el desarrollo del producto.
 
@@ -60,7 +69,8 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - `Lifac` es el nombre de la aplicacion por coincidir con el repositorio.
 - El identificador de paquete inicial puede derivarse del remoto GitHub y usarse temporalmente como `io.github.eldiablo45.lifac` hasta que exista uno definitivo.
 - La app se orienta solo a Android 16 o superior, por decision explicita del proyecto en esta etapa.
-- El primer entregable funcional sera una unica pantalla de bienvenida en Compose.
+- El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
+- Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion
 

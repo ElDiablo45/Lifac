@@ -13,23 +13,29 @@
 - [x] Validacion del proyecto en Android Studio.
 - [x] Ejecucion correcta de la app en un movil real.
 - [x] Consolidacion del bootstrap actual como estado base del repositorio.
+- [x] Definicion del producto a alto nivel como app de facturacion local para pequeno negocio.
 
 ## En curso
 
-- [ ] Consolidar una definicion minima del producto `Lifac`.
+- [ ] Traducir la idea general del producto a un MVP concreto de pantallas y datos.
 
 ## Pendiente
 
-- [ ] Definir problema, usuarios y casos de uso principales.
+- [ ] Definir flujo de creacion de factura de extremo a extremo.
+- [ ] Definir modelo de datos local para emisor, clientes, productos, facturas y lineas.
 - [ ] Diseñar la arquitectura funcional del producto sobre la base Android creada.
+- [ ] Diseñar la salida PDF inicial.
+- [ ] Confirmar casuistica fiscal minima del MVP para una pequena constructora en Espana.
 - [ ] Implementar el primer entregable funcional.
 - [ ] Configurar estrategia de testing.
 - [ ] Configurar flujo de integracion y despliegue.
+- [ ] Diseñar backup local-exportable y futura integracion opcional con Google Drive.
 
 ## Riesgos abiertos
 
-- [ ] El producto real sigue sin estar definido mas alla de ser una app Android.
+- [ ] La simplicidad percibida puede romperse si el flujo fiscal y de numeracion se vuelve demasiado configurable.
 - [ ] El `minSdk` actual de Android 16+ es una decision fuerte que debera confirmarse frente al alcance comercial real.
+- [ ] Para construccion no siempre basta con "solo IVA"; puede haber operaciones con inversion del sujeto pasivo.
 - [ ] La shell actual no expone JDK ni Gradle, asi que la validacion inicial sigue dependiendo del IDE local del usuario.
 
 ## Criterio de avance inmediato
@@ -49,4 +55,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Definir el producto real en una pagina y convertir esa definicion en el siguiente corte de arquitectura y roadmap.
+- [ ] Cerrar el MVP funcional: datos obligatorios, pantallas, flujo de factura y reglas fiscales minimas.

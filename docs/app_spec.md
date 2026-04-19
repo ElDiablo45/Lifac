@@ -2,18 +2,22 @@
 
 ## Resumen del proyecto
 
-`Lifac` se define inicialmente como una aplicacion Android nativa. El objetivo de esta fase es crear una base moderna, actual y mantenible, alineada con las recomendaciones de Google, con foco en Android 16 y un primer entregable minimo de tipo `Hello World`.
+`Lifac` es una aplicacion Android nativa orientada a generar facturas de la forma mas sencilla posible. El producto esta pensado inicialmente para pequeno negocio, con un primer usuario de referencia en el sector de la construccion. La app debe funcionar en modo local, mantener los datos en el dispositivo y generar facturas completas en PDF sin depender de una cuenta ni de una nube propia.
 
 ## Objetivos funcionales actuales
 
 - Mantener una base documental versionada que permita retomar el contexto del proyecto en futuras sesiones.
-- Bootstrapear una app Android que abra correctamente y muestre una pantalla inicial simple.
+- Permitir crear facturas completas con datos fiscales, serie o numero, fecha, cliente, lineas e IVA.
+- Mantener catalogo local de clientes y catalogo local de productos o conceptos.
+- Generar un PDF final listo para compartir o archivar.
+- Guardar y consultar las facturas en almacenamiento local del dispositivo.
 - Establecer una base tecnica moderna sobre la que el producto real pueda crecer sin retrabajo innecesario.
 
 ## No objetivos iniciales
 
-- No construir todavia funcionalidad de negocio mas alla del `Hello World`.
-- No introducir navegacion, persistencia, red o inyeccion de dependencias sin necesidad real.
+- No depender de backend ni cuenta de usuario.
+- No sincronizar datos operativos a servidores propios.
+- No cubrir de inicio casuisticas fiscales de muchos paises o sectores a la vez.
 - No modularizar prematuramente el proyecto antes de conocer el producto.
 
 ## Arquitectura actual o propuesta
@@ -43,6 +47,7 @@
 - Compose como toolkit de UI recomendado por Google.
 - Material 3 para componentes y tema.
 - `ViewModel` y `StateFlow` para manejo de estado.
+- Persistencia local en dispositivo.
 - Estructura inicial simple de modulo unico `app`, con posibilidad de modularizar mas adelante si el producto lo exige.
 
 ## Requisitos tecnicos conocidos
@@ -56,12 +61,15 @@
   - Material 3.
 - El historial git debe mantenerse limpio, pequeno y reversible.
 - La configuracion debe ser apta para abrirse directamente en Android Studio y sincronizarse con Gradle.
+- El producto debe ser usable completamente offline para la operativa principal.
+- El backup externo, si existe, debe ser opcional y accionado por el usuario.
 
 ## Requisitos tecnicos pendientes de definir
 
-- `minSdk` definitivo segun objetivo comercial real.
-- Estrategia de persistencia de datos.
-- Navegacion de la app.
+- Estrategia exacta de persistencia local.
+- Navegacion de la app y flujo principal.
+- Modelo de numeracion de facturas y series.
+- Casuistica fiscal exacta del MVP para construccion en Espana.
 - Entorno de despliegue y distribucion.
 - CI/CD.
 - Politicas de observabilidad, seguridad y configuracion.
@@ -99,18 +107,19 @@ Estado actual de validacion:
 
 ### Fase 2: Definicion de producto
 
-- Describir el problema que resuelve `Lifac`.
-- Identificar usuarios, casos de uso y alcance inicial.
+- Definir el flujo exacto de facturacion para pequeno negocio.
+- Identificar datos obligatorios del emisor, cliente y factura.
+- Confirmar tratamiento fiscal inicial necesario para el primer usuario.
 - Convertir incertidumbre en decisiones documentadas.
 
 ### Fase 3: Decisiones tecnicas de producto
 
-- Elegir stack y arquitectura inicial.
+- Definir persistencia local, generacion de PDF y estrategia de backup futuro.
 - Definir estructura de carpetas, calidad y despliegue.
 - Registrar riesgos y tradeoffs.
 
 ### Fase 4: Implementacion del primer entregable real
 
-- Construir el MVP o primera capacidad operativa.
+- Construir el MVP de facturacion local con PDF.
 - Validar funcionalidad contra criterios documentados.
 - Mantener roadmap y memoria sincronizados con el avance real.
