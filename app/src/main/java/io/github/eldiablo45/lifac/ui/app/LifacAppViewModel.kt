@@ -53,16 +53,33 @@ class LifacAppViewModel(
         }
     }
 
-    val uiState: StateFlow<LifacAppUiState> = combine(
+    private val uiBaseState = combine(
         currentSection,
         clientRepository.observeClients(),
         conceptRepository.observeConcepts(),
         clientForm,
         conceptForm,
+    ) { section, storedClients, storedConcepts, currentClientForm, currentConceptForm ->
+        UiBaseState(
+            section = section,
+            storedClients = storedClients,
+            storedConcepts = storedConcepts,
+            currentClientForm = currentClientForm,
+            currentConceptForm = currentConceptForm,
+        )
+    }
+
+    val uiState: StateFlow<LifacAppUiState> = combine(
+        uiBaseState,
         draftForm,
         pickingClientForDraft,
         pickingConceptForDraft,
-    ) { section, storedClients, storedConcepts, currentClientForm, currentConceptForm, draft, isPickingClient, isPickingConcept ->
+    ) { baseState, draft, isPickingClient, isPickingConcept ->
+        val section = baseState.section
+        val storedClients = baseState.storedClients
+        val storedConcepts = baseState.storedConcepts
+        val currentClientForm = baseState.currentClientForm
+        val currentConceptForm = baseState.currentConceptForm
         val mappedClients = storedClients.map { storedClient ->
             ClientListItemUiState(
                 id = storedClient.id,
@@ -578,6 +595,14 @@ private data class DraftTotals(
     val subtotal: Double,
     val taxTotal: Double,
     val grandTotal: Double,
+)
+
+private data class UiBaseState(
+    val section: LifacSection,
+    val storedClients: List<StoredClient>,
+    val storedConcepts: List<StoredConcept>,
+    val currentClientForm: ClientFormUiState,
+    val currentConceptForm: ConceptFormUiState,
 )
 
 private fun defaultDraftForm(): InvoiceDraftFormState = InvoiceDraftFormState()
