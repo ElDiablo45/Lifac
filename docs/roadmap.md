@@ -16,6 +16,7 @@
 - [x] Definicion del producto a alto nivel como app de facturacion local para pequeno negocio.
 - [x] Sustitucion del `Hello World` por un shell navegable del MVP.
 - [x] Primera capacidad real persistida: alta y listado local de clientes.
+- [x] Conexion de `Nueva factura` con clientes reales guardados.
 
 ## En curso
 
@@ -63,4 +64,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Conectar `Nueva factura` con clientes reales guardados o persistir el primer borrador de factura.
+- [ ] Persistir el primer borrador de factura o conectar conceptos reales al editor.

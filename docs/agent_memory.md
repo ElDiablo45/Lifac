@@ -12,6 +12,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El bootstrap ya fue validado por el usuario en Android Studio y ejecutado con exito en un movil real.
 - La primera iteracion visual del producto ya reemplaza el `Hello World` por un shell navegable del MVP.
 - La seccion `Clientes` ya es la primera capacidad real persistida localmente.
+- `Nueva factura` ya puede seleccionar clientes reales guardados localmente.
 
 ## Decisiones activas
 
@@ -35,6 +36,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
   - PDF como salida final del flujo.
 - El estado actual de UI usa datos de ejemplo y placeholders intencionados en campos todavia no decididos.
 - El resto de secciones siguen usando datos de ejemplo, pero `Clientes` ya guarda datos reales en base local Room.
+- El flujo de borrador de factura sigue siendo parcial, pero su paso de cliente ya no depende de datos ficticios.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -87,7 +89,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El MVP debe contemplar clientes empresa y clientes particular.
 - La propuesta actual separa los datos del cliente segun tipo, pero mantiene un unico flujo de facturacion.
 - La siguiente iteracion tecnica con mas valor es persistencia local real para clientes o borradores de factura.
-- La siguiente iteracion con mas valor ahora es conectar `Nueva factura` con los clientes reales guardados o persistir borradores de factura.
+- La siguiente iteracion con mas valor ahora es persistir el primer borrador de factura o conectar conceptos reales al editor.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

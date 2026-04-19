@@ -305,4 +305,5 @@ Estado actual de validacion:
 - La app ya muestra `Inicio`, `Facturas`, `Clientes`, `Conceptos`, `Ajustes` y `Editor de factura`.
 - El flujo visual ya incluye placeholders para campos aun no cerrados.
 - `Clientes` ya funciona con persistencia local real.
+- `Nueva factura` ya puede seleccionar clientes reales guardados.
 - La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.

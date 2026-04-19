@@ -60,6 +60,8 @@ fun LifacAppScreen(
     onClientNotesChanged: (String) -> Unit,
     onSaveClient: () -> Unit,
     onResetClientForm: () -> Unit,
+    onDraftClientSelected: (String) -> Unit,
+    onOpenClientsForDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -171,6 +173,9 @@ fun LifacAppScreen(
 
                 LifacSection.INVOICE_EDITOR -> InvoiceEditorScreen(
                     draft = uiState.draft,
+                    clients = uiState.clients,
+                    onDraftClientSelected = onDraftClientSelected,
+                    onOpenClientsForDraft = onOpenClientsForDraft,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -623,6 +628,9 @@ private fun SettingsScreen(
 @Composable
 private fun InvoiceEditorScreen(
     draft: InvoiceDraftUiState,
+    clients: List<ClientListItemUiState>,
+    onDraftClientSelected: (String) -> Unit,
+    onOpenClientsForDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -660,7 +668,43 @@ private fun InvoiceEditorScreen(
                 subtitle = "Empresa o particular dentro del mismo flujo.",
             ) {
                 EditorField("Cliente", draft.selectedClientLabel)
-                PlaceholderTag("Pendiente cerrar campos obligatorios segun tipo de cliente.")
+                EditorField("Resumen", draft.selectedClientMeta)
+                Spacer(modifier = Modifier.height(8.dp))
+                if (clients.isEmpty()) {
+                    PlaceholderTag("No hay clientes guardados todavia.")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    FilledTonalButton(onClick = onOpenClientsForDraft) {
+                        Text("Ir a clientes")
+                    }
+                } else {
+                    Text(
+                        text = "Seleccion rápida",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        clients.forEach { client ->
+                            FilterChip(
+                                selected = draft.selectedClientId == client.id,
+                                onClick = { onDraftClientSelected(client.id) },
+                                label = {
+                                    Text(
+                                        text = buildString {
+                                            append(client.displayName)
+                                            append(" · ")
+                                            append(clientKindLabel(client.kind))
+                                        },
+                                    )
+                                },
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(onClick = onOpenClientsForDraft) {
+                        Text("Gestionar clientes")
+                    }
+                }
             }
         }
 
@@ -936,6 +980,9 @@ private fun LifacAppScreenPreview() {
                 concepts = emptyList(),
                 series = emptyList(),
                 draft = InvoiceDraftUiState(
+                    selectedClientId = "client",
+                    selectedClientLabel = "Cliente de muestra",
+                    selectedClientMeta = "Empresa · B00000000 · Madrid",
                     concepts = listOf(
                         DraftConceptUiState(
                             description = "Demolicion interior",
@@ -960,6 +1007,8 @@ private fun LifacAppScreenPreview() {
             onClientNotesChanged = {},
             onSaveClient = {},
             onResetClientForm = {},
+            onDraftClientSelected = {},
+            onOpenClientsForDraft = {},
             onPlaceholderAction = {},
         )
     }

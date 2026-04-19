@@ -25,4 +25,29 @@ class LifacAppViewModelTest {
             validateClientForm(form),
         )
     }
+
+    @Test
+    fun `buildDraftClientLabel uses selected client when available`() {
+        val selectedClient = ClientListItemUiState(
+            id = "client-1",
+            displayName = "Promociones Sierra Norte",
+            kind = ClientKind.BUSINESS,
+            taxId = "B80909090",
+            city = "Madrid",
+            address = "",
+            notes = "",
+        )
+
+        assertEquals(
+            "Promociones Sierra Norte",
+            buildDraftClientLabel(
+                selectedClient = selectedClient,
+                availableClientCount = 3,
+            ),
+        )
+        assertEquals(
+            "Empresa · B80909090 · Madrid",
+            buildDraftClientMeta(selectedClient),
+        )
+    }
 }

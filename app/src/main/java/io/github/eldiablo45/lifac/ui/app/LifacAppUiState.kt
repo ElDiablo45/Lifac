@@ -79,7 +79,9 @@ data class SeriesListItemUiState(
 )
 
 data class InvoiceDraftUiState(
+    val selectedClientId: String? = null,
     val selectedClientLabel: String = "Seleccionar cliente o crear uno nuevo",
+    val selectedClientMeta: String = "Placeholder: datos fiscales pendientes de cierre",
     val selectedSeries: String = "2026",
     val nextNumberPreview: String = "2026-0008",
     val issueDate: String = "19/04/2026",

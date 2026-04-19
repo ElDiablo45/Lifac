@@ -26,6 +26,7 @@ class LifacAppViewModel(
 ) : ViewModel() {
     private val currentSection = MutableStateFlow(LifacSection.HOME)
     private val clientForm = MutableStateFlow(ClientFormUiState())
+    private val selectedDraftClientId = MutableStateFlow<String?>(null)
     private val events = MutableSharedFlow<String>()
 
     val uiEvents = events.asSharedFlow()
@@ -34,33 +35,38 @@ class LifacAppViewModel(
         currentSection,
         clientRepository.observeClients(),
         clientForm,
-    ) { section, storedClients, form ->
+        selectedDraftClientId,
+    ) { section, storedClients, form, draftClientId ->
+        val mappedClients = storedClients.map { storedClient ->
+            ClientListItemUiState(
+                id = storedClient.id,
+                displayName = storedClient.displayName,
+                kind = when (storedClient.kind) {
+                    ClientType.BUSINESS -> ClientKind.BUSINESS
+                    ClientType.INDIVIDUAL -> ClientKind.INDIVIDUAL
+                },
+                taxId = storedClient.taxId.ifBlank { "Placeholder fiscal pendiente" },
+                city = storedClient.city.ifBlank { "Ciudad pendiente" },
+                address = storedClient.address,
+                notes = storedClient.notes,
+            )
+        }
+        val selectedClient = mappedClients.firstOrNull { it.id == draftClientId }
+
         LifacAppUiState(
             currentSection = section,
             emitter = EmitterProfileUiState(),
             invoices = sampleInvoices,
-            clients = storedClients.map { storedClient ->
-                ClientListItemUiState(
-                    id = storedClient.id,
-                    displayName = storedClient.displayName,
-                    kind = when (storedClient.kind) {
-                        ClientType.BUSINESS -> ClientKind.BUSINESS
-                        ClientType.INDIVIDUAL -> ClientKind.INDIVIDUAL
-                    },
-                    taxId = storedClient.taxId.ifBlank { "Placeholder fiscal pendiente" },
-                    city = storedClient.city.ifBlank { "Ciudad pendiente" },
-                    address = storedClient.address,
-                    notes = storedClient.notes,
-                )
-            },
+            clients = mappedClients,
             concepts = sampleConcepts,
             series = sampleSeries,
             draft = InvoiceDraftUiState(
-                selectedClientLabel = if (storedClients.isEmpty()) {
-                    "Seleccionar cliente o crear uno nuevo"
-                } else {
-                    "Selecciona un cliente guardado (${storedClients.size} disponibles)"
-                },
+                selectedClientId = selectedClient?.id,
+                selectedClientLabel = buildDraftClientLabel(
+                    selectedClient = selectedClient,
+                    availableClientCount = storedClients.size,
+                ),
+                selectedClientMeta = buildDraftClientMeta(selectedClient),
                 concepts = sampleDraftConcepts,
             ),
             clientForm = form,
@@ -88,6 +94,17 @@ class LifacAppViewModel(
 
     fun leaveEditor() {
         navigateTo(LifacSection.HOME)
+    }
+
+    fun selectDraftClient(clientId: String) {
+        selectedDraftClientId.value = clientId
+    }
+
+    fun openClientsForDraft() {
+        navigateTo(LifacSection.CLIENTS)
+        viewModelScope.launch {
+            events.emit("Crea o revisa clientes y luego vuelve a Nueva factura para seleccionarlo.")
+        }
     }
 
     fun updateClientKind(kind: ClientType) {
@@ -246,4 +263,36 @@ private fun ClientFormUiState.normalized(): ClientFormUiState {
         address = address.trim(),
         notes = notes.trim(),
     )
+}
+
+internal fun buildDraftClientLabel(
+    selectedClient: ClientListItemUiState?,
+    availableClientCount: Int,
+): String {
+    return when {
+        selectedClient != null -> selectedClient.displayName
+        availableClientCount == 0 -> "Seleccionar cliente o crear uno nuevo"
+        else -> "Selecciona un cliente guardado ($availableClientCount disponibles)"
+    }
+}
+
+internal fun buildDraftClientMeta(
+    selectedClient: ClientListItemUiState?,
+): String {
+    return if (selectedClient == null) {
+        "Placeholder: elige un cliente real o crea uno nuevo"
+    } else {
+        buildString {
+            append(clientKindLabel(selectedClient.kind))
+            append(" · ")
+            append(selectedClient.taxId)
+            append(" · ")
+            append(selectedClient.city)
+        }
+    }
+}
+
+private fun clientKindLabel(kind: ClientKind): String = when (kind) {
+    ClientKind.BUSINESS -> "Empresa"
+    ClientKind.INDIVIDUAL -> "Particular"
 }
