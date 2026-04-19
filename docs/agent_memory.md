@@ -10,6 +10,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El entorno de shell actual no expone `java` ni `gradle` en `PATH`, por lo que la validacion completa desde terminal puede depender de Android Studio.
 - El repo ya contiene bootstrap Android real con wrapper, modulo `app`, tests base y UI Compose inicial.
 - El bootstrap ya fue validado por el usuario en Android Studio y ejecutado con exito en un movil real.
+- La primera iteracion visual del producto ya reemplaza el `Hello World` por un shell navegable del MVP.
 
 ## Decisiones activas
 
@@ -31,6 +32,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
   - numeracion automatica por serie,
   - borradores guardables localmente,
   - PDF como salida final del flujo.
+- El estado actual de UI usa datos de ejemplo y placeholders intencionados en campos todavia no decididos.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -82,6 +84,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
 - El MVP debe contemplar clientes empresa y clientes particular.
 - La propuesta actual separa los datos del cliente segun tipo, pero mantiene un unico flujo de facturacion.
+- La siguiente iteracion tecnica con mas valor es persistencia local real para clientes o borradores de factura.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

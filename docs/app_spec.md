@@ -205,6 +205,7 @@ Interpretacion operativa inicial:
   - UI en Jetpack Compose,
   - `ViewModel` como state holder,
   - flujo de datos unidireccional desde estado hacia UI,
+  - shell navegable del MVP con datos de ejemplo,
   - modulo unico `app`.
 
 ### Arquitectura propuesta para la siguiente fase
@@ -297,3 +298,10 @@ Estado actual de validacion:
 - Construir el MVP de facturacion local con PDF.
 - Validar funcionalidad contra criterios documentados.
 - Mantener roadmap y memoria sincronizados con el avance real.
+
+## Estado actual de implementacion
+
+- El `Hello World` inicial ya fue sustituido por un primer shell de producto.
+- La app ya muestra `Inicio`, `Facturas`, `Clientes`, `Conceptos`, `Ajustes` y `Editor de factura`.
+- El flujo visual ya incluye placeholders para campos aun no cerrados.
+- La persistencia local real y la generacion real de PDF siguen pendientes.

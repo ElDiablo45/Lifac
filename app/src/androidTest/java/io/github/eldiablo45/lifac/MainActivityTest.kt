@@ -11,10 +11,8 @@ class MainActivityTest {
     val composeRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun displaysHelloWorldMessage() {
-        composeRule.onNodeWithText("Hello World").assertIsDisplayed()
-        composeRule
-            .onNodeWithText("Base Android 16 con Kotlin, Compose y Material 3.")
-            .assertIsDisplayed()
+    fun displaysHomeWorkspace() {
+        composeRule.onNodeWithText("Nueva factura").assertIsDisplayed()
+        composeRule.onNodeWithText("Facturas recientes").assertIsDisplayed()
     }
 }

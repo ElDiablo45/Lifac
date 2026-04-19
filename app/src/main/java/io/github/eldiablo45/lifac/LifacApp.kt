@@ -1,26 +1,40 @@
 package io.github.eldiablo45.lifac
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import io.github.eldiablo45.lifac.ui.home.GreetingScreen
-import io.github.eldiablo45.lifac.ui.home.GreetingViewModel
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import io.github.eldiablo45.lifac.ui.app.LifacAppScreen
+import io.github.eldiablo45.lifac.ui.app.LifacAppViewModel
 import io.github.eldiablo45.lifac.ui.theme.LifacTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun LifacApp(
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: GreetingViewModel = viewModel()
+    val viewModel: LifacAppViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LifacTheme {
-        GreetingScreen(
+        LifacAppScreen(
             uiState = uiState,
+            snackbarHostState = snackbarHostState,
+            onNavigate = viewModel::navigateTo,
+            onOpenNewInvoice = viewModel::openNewInvoice,
+            onBackFromEditor = viewModel::leaveEditor,
+            onPlaceholderAction = { message ->
+                scope.launch {
+                    snackbarHostState.showSnackbar(message)
+                }
+            },
             modifier = modifier,
         )
     }
 }
-

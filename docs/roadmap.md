@@ -14,11 +14,13 @@
 - [x] Ejecucion correcta de la app en un movil real.
 - [x] Consolidacion del bootstrap actual como estado base del repositorio.
 - [x] Definicion del producto a alto nivel como app de facturacion local para pequeno negocio.
+- [x] Sustitucion del `Hello World` por un shell navegable del MVP.
 
 ## En curso
 
 - [ ] Traducir la idea general del producto a un MVP concreto de pantallas y datos.
 - [ ] Revisar y validar la propuesta de MVP documentada.
+- [ ] Iterar el shell visual con placeholders hasta convertir cada seccion en funcionalidad real.
 
 ## Pendiente
 
@@ -60,4 +62,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Cerrar el MVP funcional: datos obligatorios, pantallas, flujo de factura y reglas fiscales minimas.
+- [ ] Convertir una primera seccion del shell en funcionalidad real persistida, idealmente clientes o borradores.
