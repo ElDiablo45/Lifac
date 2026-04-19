@@ -1,5 +1,7 @@
 package io.github.eldiablo45.lifac.ui.app
 
+import io.github.eldiablo45.lifac.data.client.ClientType
+
 enum class LifacSection(
     val title: String,
     val visibleInBottomBar: Boolean,
@@ -25,6 +27,7 @@ data class LifacAppUiState(
     val concepts: List<ConceptListItemUiState> = emptyList(),
     val series: List<SeriesListItemUiState> = emptyList(),
     val draft: InvoiceDraftUiState = InvoiceDraftUiState(),
+    val clientForm: ClientFormUiState = ClientFormUiState(),
 )
 
 data class EmitterProfileUiState(
@@ -50,6 +53,17 @@ data class ClientListItemUiState(
     val kind: ClientKind,
     val taxId: String,
     val city: String,
+    val address: String,
+    val notes: String,
+)
+
+data class ClientFormUiState(
+    val kind: ClientType = ClientType.BUSINESS,
+    val displayName: String = "",
+    val taxId: String = "",
+    val city: String = "",
+    val address: String = "",
+    val notes: String = "",
 )
 
 data class ConceptListItemUiState(

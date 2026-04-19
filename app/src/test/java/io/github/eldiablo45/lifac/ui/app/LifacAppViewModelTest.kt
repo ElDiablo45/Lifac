@@ -1,20 +1,28 @@
 package io.github.eldiablo45.lifac.ui.app
 
+import io.github.eldiablo45.lifac.data.client.ClientType
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class LifacAppViewModelTest {
     @Test
-    fun `initial state exposes invoice workspace sample data`() {
-        val viewModel = LifacAppViewModel()
-        val state = viewModel.uiState.value
+    fun `validateClientForm accepts non empty display name`() {
+        val form = ClientFormUiState(
+            kind = ClientType.BUSINESS,
+            displayName = "Construcciones Norte",
+        )
 
-        assertEquals(LifacSection.HOME, state.currentSection)
-        assertEquals("Construcciones Lifac", state.emitter.businessName)
-        assertTrue(state.invoices.isNotEmpty())
-        assertTrue(state.clients.isNotEmpty())
-        assertTrue(state.concepts.isNotEmpty())
-        assertEquals("2026", state.draft.selectedSeries)
+        assertNull(validateClientForm(form))
+    }
+
+    @Test
+    fun `validateClientForm rejects blank display name`() {
+        val form = ClientFormUiState(displayName = " ")
+
+        assertEquals(
+            "El nombre del cliente es obligatorio.",
+            validateClientForm(form),
+        )
     }
 }

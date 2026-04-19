@@ -15,6 +15,7 @@
 - [x] Consolidacion del bootstrap actual como estado base del repositorio.
 - [x] Definicion del producto a alto nivel como app de facturacion local para pequeno negocio.
 - [x] Sustitucion del `Hello World` por un shell navegable del MVP.
+- [x] Primera capacidad real persistida: alta y listado local de clientes.
 
 ## En curso
 
@@ -25,7 +26,7 @@
 ## Pendiente
 
 - [ ] Definir flujo de creacion de factura de extremo a extremo.
-- [ ] Definir modelo de datos local para emisor, clientes, productos, facturas y lineas.
+- [ ] Definir modelo de datos local para emisor, productos, facturas y lineas.
 - [ ] Diseñar la arquitectura funcional del producto sobre la base Android creada.
 - [ ] Diseñar la salida PDF inicial.
 - [ ] Confirmar casuistica fiscal minima del MVP para una pequena constructora en Espana.
@@ -62,4 +63,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Convertir una primera seccion del shell en funcionalidad real persistida, idealmente clientes o borradores.
+- [ ] Conectar `Nueva factura` con clientes reales guardados o persistir el primer borrador de factura.

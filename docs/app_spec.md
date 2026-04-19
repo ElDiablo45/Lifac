@@ -304,4 +304,5 @@ Estado actual de validacion:
 - El `Hello World` inicial ya fue sustituido por un primer shell de producto.
 - La app ya muestra `Inicio`, `Facturas`, `Clientes`, `Conceptos`, `Ajustes` y `Editor de factura`.
 - El flujo visual ya incluye placeholders para campos aun no cerrados.
-- La persistencia local real y la generacion real de PDF siguen pendientes.
+- `Clientes` ya funciona con persistencia local real.
+- La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.

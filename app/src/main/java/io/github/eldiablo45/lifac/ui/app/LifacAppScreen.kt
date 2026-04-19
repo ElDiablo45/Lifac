@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -40,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.eldiablo45.lifac.data.client.ClientType
 import io.github.eldiablo45.lifac.ui.theme.LifacTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +52,14 @@ fun LifacAppScreen(
     onNavigate: (LifacSection) -> Unit,
     onOpenNewInvoice: () -> Unit,
     onBackFromEditor: () -> Unit,
+    onClientKindSelected: (ClientType) -> Unit,
+    onClientDisplayNameChanged: (String) -> Unit,
+    onClientTaxIdChanged: (String) -> Unit,
+    onClientCityChanged: (String) -> Unit,
+    onClientAddressChanged: (String) -> Unit,
+    onClientNotesChanged: (String) -> Unit,
+    onSaveClient: () -> Unit,
+    onResetClientForm: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -133,6 +143,15 @@ fun LifacAppScreen(
 
                 LifacSection.CLIENTS -> ClientsScreen(
                     clients = uiState.clients,
+                    form = uiState.clientForm,
+                    onClientKindSelected = onClientKindSelected,
+                    onClientDisplayNameChanged = onClientDisplayNameChanged,
+                    onClientTaxIdChanged = onClientTaxIdChanged,
+                    onClientCityChanged = onClientCityChanged,
+                    onClientAddressChanged = onClientAddressChanged,
+                    onClientNotesChanged = onClientNotesChanged,
+                    onSaveClient = onSaveClient,
+                    onResetClientForm = onResetClientForm,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -307,6 +326,15 @@ private fun InvoicesScreen(
 @Composable
 private fun ClientsScreen(
     clients: List<ClientListItemUiState>,
+    form: ClientFormUiState,
+    onClientKindSelected: (ClientType) -> Unit,
+    onClientDisplayNameChanged: (String) -> Unit,
+    onClientTaxIdChanged: (String) -> Unit,
+    onClientCityChanged: (String) -> Unit,
+    onClientAddressChanged: (String) -> Unit,
+    onClientNotesChanged: (String) -> Unit,
+    onSaveClient: () -> Unit,
+    onResetClientForm: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -327,9 +355,110 @@ private fun ClientsScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "La captura exacta de campos aun no esta cerrada. Por eso aqui veras placeholders ligeros antes de persistir nada.",
+                        text = "Esta ya es la primera parte real de la app: los clientes se guardan localmente en el dispositivo. Los campos dudosos se mantienen opcionales por ahora.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                }
+            }
+        }
+
+        item {
+            ElevatedCard {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = "Nuevo cliente",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = form.kind == ClientType.BUSINESS,
+                            onClick = { onClientKindSelected(ClientType.BUSINESS) },
+                            label = { Text("Empresa") },
+                        )
+                        FilterChip(
+                            selected = form.kind == ClientType.INDIVIDUAL,
+                            onClick = { onClientKindSelected(ClientType.INDIVIDUAL) },
+                            label = { Text("Particular") },
+                        )
+                    }
+                    OutlinedTextField(
+                        value = form.displayName,
+                        onValueChange = onClientDisplayNameChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = {
+                            Text(
+                                if (form.kind == ClientType.BUSINESS) {
+                                    "Nombre fiscal o razon social"
+                                } else {
+                                    "Nombre del cliente"
+                                },
+                            )
+                        },
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = form.taxId,
+                        onValueChange = onClientTaxIdChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("NIF o identificador fiscal") },
+                        placeholder = { Text("Placeholder: opcional por ahora") },
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = form.city,
+                        onValueChange = onClientCityChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Ciudad") },
+                        placeholder = { Text("Placeholder: ayuda para encontrarlo luego") },
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = form.address,
+                        onValueChange = onClientAddressChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Direccion") },
+                        placeholder = { Text("Placeholder: opcional hasta cerrar el formulario final") },
+                    )
+                    OutlinedTextField(
+                        value = form.notes,
+                        onValueChange = onClientNotesChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Notas") },
+                        placeholder = { Text("Placeholder: obra, referencia o comentario") },
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FilledTonalButton(onClick = onSaveClient) {
+                            Text("Guardar cliente")
+                        }
+                        OutlinedButton(onClick = onResetClientForm) {
+                            Text("Limpiar")
+                        }
+                    }
+                }
+            }
+        }
+
+        if (clients.isEmpty()) {
+            item {
+                ElevatedCard {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "Aun no hay clientes guardados",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = "Usa el formulario superior para crear el primero. Quedara persistido localmente en este dispositivo.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
             }
         }
@@ -344,7 +473,17 @@ private fun ClientsScreen(
                     headlineContent = { Text(client.displayName) },
                     supportingContent = {
                         Text(
-                            text = "${clientKindLabel(client.kind)} · ${client.taxId} · ${client.city}",
+                            text = buildString {
+                                append(clientKindLabel(client.kind))
+                                append(" · ")
+                                append(client.taxId)
+                                append(" · ")
+                                append(client.city)
+                                if (client.address.isNotBlank()) {
+                                    append(" · ")
+                                    append(client.address)
+                                }
+                            },
                         )
                     },
                     trailingContent = {
@@ -783,7 +922,17 @@ private fun LifacAppScreenPreview() {
                         date = "19/04/2026",
                     ),
                 ),
-                clients = emptyList(),
+                clients = listOf(
+                    ClientListItemUiState(
+                        id = "client",
+                        displayName = "Cliente de muestra",
+                        kind = ClientKind.BUSINESS,
+                        taxId = "B00000000",
+                        city = "Madrid",
+                        address = "Calle Mayor 1",
+                        notes = "",
+                    ),
+                ),
                 concepts = emptyList(),
                 series = emptyList(),
                 draft = InvoiceDraftUiState(
@@ -797,11 +946,20 @@ private fun LifacAppScreenPreview() {
                         ),
                     ),
                 ),
+                clientForm = ClientFormUiState(),
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onNavigate = {},
             onOpenNewInvoice = {},
             onBackFromEditor = {},
+            onClientKindSelected = {},
+            onClientDisplayNameChanged = {},
+            onClientTaxIdChanged = {},
+            onClientCityChanged = {},
+            onClientAddressChanged = {},
+            onClientNotesChanged = {},
+            onSaveClient = {},
+            onResetClientForm = {},
             onPlaceholderAction = {},
         )
     }
