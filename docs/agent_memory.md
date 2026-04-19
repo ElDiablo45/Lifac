@@ -25,6 +25,12 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - Los datos fijos del emisor deben guardarse en ajustes y reutilizarse sin pedirlos en cada factura.
 - Las lineas de factura se modelan inicialmente como `conceptos`, sin separar todavia entre producto y servicio.
 - Copias de seguridad exportables son deseables a futuro, con posibilidad prevista de backup a Google Drive.
+- Propuesta operativa actual del MVP:
+  - `Inicio`, `Facturas`, `Clientes`, `Conceptos` y `Ajustes` como pantallas base,
+  - flujo principal de nueva factura en pasos cortos,
+  - numeracion automatica por serie,
+  - borradores guardables localmente,
+  - PDF como salida final del flujo.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -75,6 +81,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - La app se orienta solo a Android 16 o superior, por decision explicita del proyecto en esta etapa.
 - El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
 - El MVP debe contemplar clientes empresa y clientes particular.
+- La propuesta actual separa los datos del cliente segun tipo, pero mantiene un unico flujo de facturacion.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

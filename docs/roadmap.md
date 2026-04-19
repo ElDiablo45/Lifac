@@ -18,6 +18,7 @@
 ## En curso
 
 - [ ] Traducir la idea general del producto a un MVP concreto de pantallas y datos.
+- [ ] Revisar y validar la propuesta de MVP documentada.
 
 ## Pendiente
 
@@ -29,6 +30,7 @@
 - [ ] Definir numeracion automatica por serie.
 - [ ] Definir ajustes persistentes del emisor.
 - [ ] Definir diferencias de captura entre cliente empresa y cliente particular.
+- [ ] Confirmar cuando un borrador debe consumir o no numero definitivo.
 - [ ] Implementar el primer entregable funcional.
 - [ ] Configurar estrategia de testing.
 - [ ] Configurar flujo de integracion y despliegue.

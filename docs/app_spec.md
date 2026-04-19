@@ -17,6 +17,173 @@
 - Modelar cada linea como `concepto` en el MVP inicial.
 - Establecer una base tecnica moderna sobre la que el producto real pueda crecer sin retrabajo innecesario.
 
+## Propuesta de MVP v1
+
+### Resultado esperado
+
+El usuario debe poder crear una factura completa en pocos minutos, guardarla localmente, regenerarla despues y exportarla como PDF sin depender de internet.
+
+### Pantallas del MVP
+
+1. `Inicio`
+2. `Facturas`
+3. `Editor de factura`
+4. `Clientes`
+5. `Conceptos`
+6. `Ajustes`
+
+### Rol de cada pantalla
+
+- `Inicio`: acceso rapido a `Nueva factura`, `Facturas`, `Clientes`, `Conceptos` y `Ajustes`.
+- `Facturas`: listado local, busqueda, filtro basico por estado o serie y acciones de abrir, duplicar, exportar o eliminar.
+- `Editor de factura`: flujo principal de captura, con secciones cortas y progreso visible.
+- `Clientes`: catalogo local con alta y edicion de clientes empresa o particular.
+- `Conceptos`: catalogo local reutilizable para conceptos frecuentes.
+- `Ajustes`: datos persistentes del emisor, series y preferencias futuras de backup.
+
+### Flujo principal de nueva factura
+
+1. Seleccionar cliente existente o crear uno nuevo.
+2. Completar datos de factura:
+   - serie,
+   - numero autogenerado,
+   - fecha de emision,
+   - fecha de operacion si difiere,
+   - estado borrador o emitida.
+3. Añadir conceptos:
+   - descripcion,
+   - cantidad,
+   - precio unitario,
+   - descuento opcional,
+   - impuesto aplicable.
+4. Revisar impuestos y totales.
+5. Previsualizar.
+6. Generar PDF y compartir o guardar.
+
+### Flujo secundario de facturas
+
+- Crear borrador y retomarlo mas tarde.
+- Duplicar factura anterior para acelerar la emision de facturas similares.
+- Exportar de nuevo un PDF desde el historial.
+- Rectificar mas adelante como fase posterior, no obligatoria para el primer corte del MVP.
+
+## Propuesta de datos del MVP
+
+### Emisor
+
+- nombre o razon social
+- NIF
+- direccion fiscal
+- codigo postal
+- municipio
+- provincia
+- telefono opcional
+- email opcional
+- nombre comercial opcional
+
+### Cliente
+
+Campos comunes:
+
+- tipo: `empresa` o `particular`
+- nombre fiscal
+- NIF o identificador fiscal
+- direccion
+- codigo postal
+- municipio
+- provincia
+- telefono opcional
+- email opcional
+- notas opcionales
+
+Diferencia inicial propuesta:
+
+- `empresa`: razon social y NIF obligatorios.
+- `particular`: nombre completo obligatorio y NIF configurable como obligatorio segun el caso de uso final.
+
+### Concepto reutilizable
+
+- nombre corto
+- descripcion por defecto
+- precio por defecto opcional
+- impuesto por defecto
+- activo o archivado
+
+### Serie de facturacion
+
+- codigo de serie
+- siguiente numero
+- descripcion opcional
+- activa o inactiva
+
+### Factura
+
+- id local
+- serie
+- numero
+- numero completo renderizado
+- estado: `borrador`, `emitida`
+- fecha de emision
+- fecha de operacion opcional
+- clienteId
+- observaciones opcionales
+- subtotal
+- totalImpuestos
+- total
+- ruta o referencia local al PDF exportado opcional
+- timestamps de creacion y actualizacion
+
+### Linea de factura
+
+- facturaId
+- orden
+- descripcion
+- cantidad
+- precioUnitario
+- descuentoImporte opcional
+- tipoImpositivo o modo fiscal
+- baseLinea
+- cuotaLinea
+- totalLinea
+
+## Propuesta de reglas de negocio del MVP
+
+### Numeracion
+
+- Cada factura emitida pertenece a una serie.
+- El numero se asigna automaticamente tomando el siguiente disponible de la serie elegida.
+- Los borradores no deberian consumir numero definitivo hasta la emision final, salvo que posteriormente se decida lo contrario por simplicidad tecnica.
+
+### Cliente
+
+- Debe existir un cliente seleccionado para emitir factura.
+- La app debe permitir crear cliente sin salir del flujo de nueva factura.
+
+### Impuestos
+
+La propuesta inicial para el selector fiscal del MVP es:
+
+- `IVA 21%`
+- `IVA 10%`
+- `Inversion del sujeto pasivo`
+
+Interpretacion operativa inicial:
+
+- `IVA 21%`: caso general.
+- `IVA 10%`: caso reducido cuando proceda.
+- `Inversion del sujeto pasivo`: la factura no repercute cuota de IVA y debe quedar preparada para incluir la mencion correspondiente en el PDF.
+
+### PDF
+
+- Toda factura emitida debe poder exportarse a PDF.
+- El PDF debe incluir datos del emisor, cliente, numeracion, fechas, conceptos, bases, impuestos, total y observaciones.
+
+### Datos locales
+
+- Clientes, conceptos, series, facturas y PDFs se guardan localmente.
+- No se sube ningun dato operativo a infraestructura propia.
+- Cualquier backup futuro debe ser accion voluntaria del usuario.
+
 ## No objetivos iniciales
 
 - No depender de backend ni cuenta de usuario.
@@ -71,8 +238,8 @@
 ## Requisitos tecnicos pendientes de definir
 
 - Estrategia exacta de persistencia local.
-- Navegacion de la app y flujo principal.
-- Modelo de numeracion de facturas y series.
+- Navegacion final de la app y detalles del flujo principal.
+- Modelo definitivo de numeracion de facturas y series.
 - Casuistica fiscal exacta del MVP para construccion en Espana.
 - Datos exactos del emisor y del cliente que seran obligatorios u opcionales.
 - Entorno de despliegue y distribucion.
@@ -116,6 +283,7 @@ Estado actual de validacion:
 - Identificar datos obligatorios del emisor, cliente y factura.
 - Confirmar tratamiento fiscal inicial necesario para el primer usuario.
 - Definir numeracion automatica por serie y comportamiento de borradores.
+- Validar la propuesta de pantallas y datos del MVP.
 - Convertir incertidumbre en decisiones documentadas.
 
 ### Fase 3: Decisiones tecnicas de producto
