@@ -14,10 +14,11 @@ Este archivo es el indice operativo del repositorio. Define el orden de lectura,
 
 ## Estado actual del repositorio
 
-- Repositorio git inicializado.
-- Sin commits locales todavia.
-- Sin codigo de aplicacion, sin estructura de producto y sin stack confirmado en el arbol del repo.
-- Solo existe un archivo `.codex` vacio ademas de `.git`.
+- Repositorio Android inicializado con modulo `app`.
+- Stack base confirmado: Kotlin, Jetpack Compose, Material 3, Gradle Kotlin DSL y version catalog.
+- Wrapper de Gradle incluido en el repo.
+- Existe una primera pantalla `Hello World` como bootstrap funcional.
+- La validacion completa de sync y build sigue dependiendo de comprobar el entorno local de Android Studio.
 
 ## Reglas operativas del proyecto
 

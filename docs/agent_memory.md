@@ -4,44 +4,53 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 
 ## Estado observado del repositorio
 
-- Repositorio nuevo en fase cero.
-- Git inicializado con remoto `origin`, pero sin commits locales en la copia actual.
-- No hay codigo fuente, configuracion de herramientas, estructura de carpetas de aplicacion ni stack verificable.
-- Solo existe un archivo `.codex` vacio ademas del directorio `.git`.
+- Repositorio inicializado para trabajo con memoria persistente.
+- A partir de esta conversacion, el proyecto pasa a definirse como una app Android nativa.
+- El siguiente hito operativo es bootstrapear una app minima funcional tipo `Hello World`.
+- El entorno de shell actual no expone `java` ni `gradle` en `PATH`, por lo que la validacion completa desde terminal puede depender de Android Studio.
+- El repo ya contiene bootstrap Android real con wrapper, modulo `app`, tests base y UI Compose inicial.
 
 ## Decisiones activas
 
-- La documentacion base se crea antes de cualquier implementacion de producto.
-- Hasta que existan archivos reales, no se considera confirmado ningun stack tecnologico.
-- El proyecto usara memoria persistente basada en documentos del repo: `AGENTS.md`, `docs/agent_memory.md`, `docs/app_spec.md` y `docs/roadmap.md`.
-- Cualquier decision tecnica futura relevante debe quedar reflejada primero en esta memoria o en la spec antes de extender la base de codigo.
+- `Lifac` se implementa como aplicacion Android nativa.
+- Plataforma objetivo inicial: Android 16, es decir API 36 para `compileSdk` y `targetSdk`.
+- `minSdk` inicial elegido: 29, como compromiso temporal entre base moderna y compatibilidad razonable.
+- Stack base: Kotlin, Jetpack Compose, Material 3, Gradle Kotlin DSL, version catalog y wrapper de Gradle.
+- Arquitectura inicial recomendada: una sola `Activity`, UI en Compose, estado expuesto desde `ViewModel` y flujo de datos unidireccional.
+- Namespace y `applicationId` iniciales: `io.github.eldiablo45.lifac`.
+- La documentacion base se actualiza antes de cambios estructurales relevantes.
+- El proyecto mantiene memoria persistente basada en `AGENTS.md`, `docs/agent_memory.md`, `docs/app_spec.md` y `docs/roadmap.md`.
 
 ## Restricciones acordadas
 
-- No asumir arquitectura ni funcionalidad que no este respaldada por archivos reales o decisiones explicitas.
-- Adaptar la documentacion al estado real del repo, aunque ese estado sea casi vacio.
+- No asumir producto o dominio de negocio mas alla de que el primer entregable es una app Android base.
+- Priorizar tecnologias estables y recomendadas por Google frente a previews innecesarias para el arranque.
 - Mantener continuidad entre conversaciones mediante documentos versionados dentro del repo.
 - Priorizar commits pequenos, reversibles y con una unica intencion por hito.
 - Hacer push tras cada commit relevante para conservar trazabilidad fuera de la maquina local.
+- No introducir complejidad de arquitectura, navegacion o DI antes de que el producto la necesite.
 
 ## Riesgos abiertos
 
-- El producto real aun no esta definido en el repositorio mas alla del nombre `Lifac`.
+- El producto real aun no esta definido mas alla de ser una app Android nueva.
 - No hay informacion suficiente para fijar dominio de negocio, usuarios objetivo ni alcance funcional.
-- No existe stack confirmado, por lo que cualquier bootstrap tecnico prematuro podria generar retrabajo.
-- El remoto `origin/main` aparece sin referencia util en la copia local actual; conviene validar mas adelante el estado real de la rama remota si afecta al flujo de trabajo.
+- La shell actual no expone JDK ni Gradle, por lo que el primer sync y algunas validaciones podrian depender de Android Studio.
+- La compatibilidad exacta con herramientas locales instaladas por el usuario debe comprobarse en el primer sync del IDE.
+- Aun no esta verificado en este entorno que todas las dependencias resuelvan y compilen correctamente en tu Android Studio.
 
 ## Contexto que no debe perderse
 
 - Este repositorio fue preparado explicitamente para trabajar con memoria persistente y coordinacion de agentes desde el inicio.
-- El objetivo inmediato no es implementar producto, sino dejar una base documental que permita futuras conversaciones con contexto consistente.
-- La ausencia de codigo no es un error: forma parte del estado actual que debe preservarse en la documentacion.
+- En esta conversacion se define por primera vez la direccion tecnica del proyecto: Android nativo moderno.
+- El objetivo inmediato es crear una base fresca, actual y duradera para Android 16 con un primer `Hello World`.
+- La arquitectura debe mantenerse simple hasta que el producto real exija capas adicionales.
 
 ## Supuestos validos por ahora
 
-- `Lifac` es, como minimo, el nombre tentativo del proyecto porque coincide con el nombre del repositorio.
-- El proyecto esta en etapa de definicion inicial y todavia no ha pasado por una fase formal de bootstrap tecnico.
-- La siguiente conversacion util deberia aportar definicion de producto, stack o restricciones de negocio antes de generar codigo estructural.
+- `Lifac` es el nombre de la aplicacion por coincidir con el repositorio.
+- El identificador de paquete inicial puede derivarse del remoto GitHub y usarse temporalmente como `io.github.eldiablo45.lifac` hasta que exista uno definitivo.
+- El `minSdk` inicial se fija en 29 como supuesto ajustable mientras no exista requerimiento comercial contrario.
+- El primer entregable funcional sera una unica pantalla de bienvenida en Compose.
 
 ## Disparadores de actualizacion
 

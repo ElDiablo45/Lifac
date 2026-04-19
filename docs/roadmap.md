@@ -6,28 +6,29 @@
 - [x] Confirmacion de que el repo esta practicamente vacio y sin codigo de aplicacion.
 - [x] Creacion del sistema base de memoria persistente y coordinacion documental.
 - [x] Definicion del orden de lectura operativo en `AGENTS.md`.
+- [x] Definicion de la plataforma inicial del proyecto como app Android nativa.
+- [x] Definicion de objetivo tecnico inicial: base moderna para Android 16.
+- [x] Creacion del bootstrap Android con Gradle Kotlin DSL, wrapper y modulo `app`.
+- [x] Implementacion de una primera pantalla `Hello World` en Compose.
 
 ## En curso
 
 - [ ] Consolidar una definicion minima del producto `Lifac`.
-- [ ] Convertir supuestos actuales en decisiones verificadas.
+- [ ] Validar el primer sync y build en Android Studio.
 
 ## Pendiente
 
 - [ ] Definir problema, usuarios y casos de uso principales.
-- [ ] Elegir stack tecnico inicial.
-- [ ] Diseñar arquitectura de aplicacion y estructura de carpetas.
-- [ ] Bootstrapear el proyecto con herramientas y validaciones basicas.
+- [ ] Diseñar la arquitectura funcional del producto sobre la base Android creada.
 - [ ] Implementar el primer entregable funcional.
 - [ ] Configurar estrategia de testing.
 - [ ] Configurar flujo de integracion y despliegue.
 
 ## Riesgos abiertos
 
-- [ ] El nombre del repo no basta para deducir el producto real.
-- [ ] Elegir stack demasiado pronto puede bloquear o duplicar trabajo.
-- [ ] Sin definicion de alcance, cualquier roadmap tecnico seria especulativo.
-- [ ] El estado del remoto deberia revisarse cuando empiece el trabajo colaborativo real.
+- [ ] El producto real sigue sin estar definido mas alla de ser una app Android.
+- [ ] El `minSdk` definitivo sigue siendo un supuesto tecnico hasta conocer objetivos comerciales.
+- [ ] La shell actual no expone JDK ni Gradle, asi que la validacion inicial puede depender del IDE.
 
 ## Criterio de avance inmediato
 
@@ -38,6 +39,12 @@ Se puede avanzar al siguiente hito cuando exista una descripcion breve y verific
 - cual es el primer problema a resolver,
 - que restricciones tecnicas o de negocio condicionan el arranque.
 
+Y, en el corto plazo tecnico, cuando:
+
+- el proyecto sincronice en Android Studio,
+- la app instale en emulador o dispositivo,
+- la pantalla inicial se renderice correctamente.
+
 ## Siguiente hito recomendado
 
-- [ ] Redactar una definicion de producto de una pagina y convertirla en actualizacion de `docs/app_spec.md` y `docs/agent_memory.md`.
+- [ ] Verificar el bootstrap Android en Android Studio y luego definir el producto real en una pagina.
