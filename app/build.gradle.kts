@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "io.github.eldiablo45.lifac"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.github.eldiablo45.lifac"
-        minSdk = 29
+        minSdk = 36
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"

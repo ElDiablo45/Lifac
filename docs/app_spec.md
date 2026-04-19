@@ -34,8 +34,9 @@
 
 ### Arquitectura propuesta para la siguiente fase
 
-- Aplicacion Android con `compileSdk` y `targetSdk` 36.
-- `minSdk` inicial 29.
+- Aplicacion Android con `compileSdk` 37.
+- `targetSdk` 36.
+- `minSdk` 36.
 - Kotlin como lenguaje principal.
 - Soporte Kotlin integrado en AGP 9, sin aplicar `org.jetbrains.kotlin.android`.
 - Compose como toolkit de UI recomendado por Google.

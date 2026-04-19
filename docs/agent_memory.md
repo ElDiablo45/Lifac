@@ -13,8 +13,11 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 ## Decisiones activas
 
 - `Lifac` se implementa como aplicacion Android nativa.
-- Plataforma objetivo inicial: Android 16, es decir API 36 para `compileSdk` y `targetSdk`.
-- `minSdk` inicial elegido: 29, como compromiso temporal entre base moderna y compatibilidad razonable.
+- Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
+- Configuracion SDK actual:
+  - `minSdk = 36` para soportar solo Android 16 o superior,
+  - `targetSdk = 36` para seguir apuntando formalmente a Android 16,
+  - `compileSdk = 37` para compilar con el SDK mas reciente disponible.
 - Stack base: Kotlin integrado en AGP 9, Jetpack Compose, Material 3, Gradle Kotlin DSL, version catalog y wrapper de Gradle.
 - Arquitectura inicial recomendada: una sola `Activity`, UI en Compose, estado expuesto desde `ViewModel` y flujo de datos unidireccional.
 - Namespace y `applicationId` iniciales: `io.github.eldiablo45.lifac`.
@@ -50,7 +53,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 
 - `Lifac` es el nombre de la aplicacion por coincidir con el repositorio.
 - El identificador de paquete inicial puede derivarse del remoto GitHub y usarse temporalmente como `io.github.eldiablo45.lifac` hasta que exista uno definitivo.
-- El `minSdk` inicial se fija en 29 como supuesto ajustable mientras no exista requerimiento comercial contrario.
+- La app se orienta solo a Android 16 o superior, por decision explicita del proyecto en esta etapa.
 - El primer entregable funcional sera una unica pantalla de bienvenida en Compose.
 
 ## Disparadores de actualizacion
