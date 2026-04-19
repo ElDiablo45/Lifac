@@ -23,6 +23,7 @@ Este archivo es el indice operativo del repositorio. Define el orden de lectura,
 - `Clientes` ya persiste datos reales en Room.
 - `Nueva factura` ya reutiliza clientes reales y puede guardar un borrador activo local.
 - `Conceptos` ya debe reflejar siempre su estado real en Room y cualquier acceso desde `Nueva factura` debe preservar el contexto del borrador.
+- `Facturas` debe reflejar siempre historial persistido real y no volver a datos de ejemplo.
 
 ## Reglas operativas del proyecto
 

@@ -205,7 +205,7 @@ Interpretacion operativa inicial:
   - UI en Jetpack Compose,
   - `ViewModel` como state holder,
   - flujo de datos unidireccional desde estado hacia UI,
-  - shell navegable del MVP con datos de ejemplo,
+  - shell navegable del MVP con persistencia local ya aplicada a clientes, conceptos, borradores y facturas,
   - modulo unico `app`.
 
 ### Arquitectura propuesta para la siguiente fase
@@ -310,4 +310,5 @@ Estado actual de validacion:
 - `Nueva factura` ya guarda y recarga un borrador activo local con campos principales.
 - `Nueva factura` ya permite editar lineas reales del borrador y recalcula totales locales basicos.
 - `Conceptos` ya permite alta local de conceptos reutilizables y aplicarlos al borrador activo.
+- `Facturas` ya puede mostrar historial real persistido a partir de facturas guardadas desde el borrador.
 - La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.

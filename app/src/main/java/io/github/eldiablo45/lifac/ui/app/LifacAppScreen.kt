@@ -84,6 +84,7 @@ fun LifacAppScreen(
     onEditDraftLine: (String) -> Unit,
     onRemoveDraftLine: (String) -> Unit,
     onResetDraftLineEditor: () -> Unit,
+    onSaveInvoice: () -> Unit,
     onSaveDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -225,6 +226,7 @@ fun LifacAppScreen(
                     onEditDraftLine = onEditDraftLine,
                     onRemoveDraftLine = onRemoveDraftLine,
                     onResetDraftLineEditor = onResetDraftLineEditor,
+                    onSaveInvoice = onSaveInvoice,
                     onSaveDraft = onSaveDraft,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
@@ -315,7 +317,7 @@ private fun HomeScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Conectar conceptos reales al editor y persistir lineas para acercar el flujo a una factura util de extremo a extremo.",
+                        text = "Abrir facturas guardadas desde historial o generar PDF real sobre el modelo persistido actual.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -348,7 +350,7 @@ private fun InvoicesScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Aqui ya se visualiza el historial que luego se alimentara desde almacenamiento local real.",
+                        text = "Este listado ya se alimenta de facturas guardadas localmente desde el borrador.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -367,11 +369,32 @@ private fun InvoicesScreen(
             }
         }
 
+        if (invoices.isEmpty()) {
+            item {
+                ElevatedCard {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "Aun no hay facturas guardadas",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = "Guarda la primera desde Nueva factura para empezar a construir historial real.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
+        }
+
         items(invoices, key = { it.id }) { invoice ->
             InvoiceRowCard(
                 invoice = invoice,
                 onClick = {
-                    onPlaceholderAction("Abrir y editar factura se implementara sobre datos persistentes.")
+                    onPlaceholderAction("Abrir y editar factura guardada llegara en la siguiente iteracion.")
                 },
             )
         }
@@ -820,6 +843,7 @@ private fun InvoiceEditorScreen(
     onEditDraftLine: (String) -> Unit,
     onRemoveDraftLine: (String) -> Unit,
     onResetDraftLineEditor: () -> Unit,
+    onSaveInvoice: () -> Unit,
     onSaveDraft: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -1078,6 +1102,11 @@ private fun InvoiceEditorScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FilledTonalButton(onClick = onSaveInvoice) {
+                            Text("Guardar factura")
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         FilledTonalButton(onClick = onSaveDraft) {
                             Text("Guardar borrador")
                         }
@@ -1316,6 +1345,7 @@ private fun LifacAppScreenPreview() {
             onEditDraftLine = {},
             onRemoveDraftLine = {},
             onResetDraftLineEditor = {},
+            onSaveInvoice = {},
             onSaveDraft = {},
             onPlaceholderAction = {},
         )

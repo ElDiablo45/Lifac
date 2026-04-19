@@ -21,6 +21,7 @@
 - [x] Persistencia local del primer borrador activo de factura.
 - [x] Persistencia y edicion local de lineas reales dentro del borrador activo.
 - [x] Catalogo local de conceptos con reutilizacion desde el borrador.
+- [x] Persistencia de facturas reales y reemplazo del historial mock.
 
 ## En curso
 
@@ -68,4 +69,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Persistir facturas reales e historial editable a partir del borrador actual.
+- [ ] Abrir facturas guardadas desde historial o generar PDF real a partir de ellas.

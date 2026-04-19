@@ -18,6 +18,11 @@ import io.github.eldiablo45.lifac.data.draft.RoomDraftRepository
 import io.github.eldiablo45.lifac.data.draft.StoredDraftBundle
 import io.github.eldiablo45.lifac.data.draft.StoredDraftLine
 import io.github.eldiablo45.lifac.data.draft.StoredInvoiceDraft
+import io.github.eldiablo45.lifac.data.invoice.InvoiceRepository
+import io.github.eldiablo45.lifac.data.invoice.RoomInvoiceRepository
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoice
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceLine
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceSummary
 import java.util.Locale
 import java.util.UUID
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,6 +38,7 @@ import kotlinx.coroutines.launch
 class LifacAppViewModel(
     private val clientRepository: ClientRepository,
     private val conceptRepository: ConceptRepository,
+    private val invoiceRepository: InvoiceRepository,
     private val draftRepository: DraftRepository,
 ) : ViewModel() {
     private val currentSection = MutableStateFlow(LifacSection.HOME)
@@ -53,33 +59,43 @@ class LifacAppViewModel(
         }
     }
 
-    private val uiBaseState = combine(
+    private val uiCatalogState = combine(
         currentSection,
         clientRepository.observeClients(),
         conceptRepository.observeConcepts(),
-        clientForm,
-        conceptForm,
-    ) { section, storedClients, storedConcepts, currentClientForm, currentConceptForm ->
-        UiBaseState(
+        invoiceRepository.observeInvoiceSummaries(),
+    ) { section, storedClients, storedConcepts, storedInvoices ->
+        UiCatalogState(
             section = section,
             storedClients = storedClients,
             storedConcepts = storedConcepts,
+            storedInvoices = storedInvoices,
+        )
+    }
+
+    private val uiFormState = combine(
+        clientForm,
+        conceptForm,
+    ) { currentClientForm, currentConceptForm ->
+        UiFormState(
             currentClientForm = currentClientForm,
             currentConceptForm = currentConceptForm,
         )
     }
 
     val uiState: StateFlow<LifacAppUiState> = combine(
-        uiBaseState,
+        uiCatalogState,
+        uiFormState,
         draftForm,
         pickingClientForDraft,
         pickingConceptForDraft,
-    ) { baseState, draft, isPickingClient, isPickingConcept ->
-        val section = baseState.section
-        val storedClients = baseState.storedClients
-        val storedConcepts = baseState.storedConcepts
-        val currentClientForm = baseState.currentClientForm
-        val currentConceptForm = baseState.currentConceptForm
+    ) { catalogState, formState, draft, isPickingClient, isPickingConcept ->
+        val section = catalogState.section
+        val storedClients = catalogState.storedClients
+        val storedConcepts = catalogState.storedConcepts
+        val storedInvoices = catalogState.storedInvoices
+        val currentClientForm = formState.currentClientForm
+        val currentConceptForm = formState.currentConceptForm
         val mappedClients = storedClients.map { storedClient ->
             ClientListItemUiState(
                 id = storedClient.id,
@@ -103,6 +119,16 @@ class LifacAppViewModel(
                 taxLabel = storedConcept.taxMode,
             )
         }
+        val mappedInvoices = storedInvoices.map { storedInvoice ->
+            InvoiceListItemUiState(
+                id = storedInvoice.id,
+                number = storedInvoice.number,
+                clientName = storedInvoice.clientName,
+                status = storedInvoice.status,
+                total = storedInvoice.total,
+                date = storedInvoice.issueDate,
+            )
+        }
         val selectedClient = mappedClients.firstOrNull { it.id == draft.selectedClientId }
         val draftLines = draft.lines
             .sortedBy { it.sortOrder }
@@ -112,7 +138,7 @@ class LifacAppViewModel(
         LifacAppUiState(
             currentSection = section,
             emitter = EmitterProfileUiState(),
-            invoices = sampleInvoices,
+            invoices = mappedInvoices,
             clients = mappedClients,
             concepts = mappedConcepts,
             series = sampleSeries,
@@ -158,7 +184,7 @@ class LifacAppViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = LifacAppUiState(
             emitter = EmitterProfileUiState(),
-            invoices = sampleInvoices,
+            invoices = emptyList(),
             concepts = emptyList(),
             series = sampleSeries,
             draft = InvoiceDraftUiState(
@@ -512,6 +538,53 @@ class LifacAppViewModel(
         }
     }
 
+    fun saveInvoice() {
+        val normalizedDraft = draftForm.value.normalized()
+        val validationError = validateDraftForInvoiceSave(normalizedDraft)
+
+        if (validationError != null) {
+            viewModelScope.launch {
+                events.emit(validationError)
+            }
+            return
+        }
+
+        val invoiceId = UUID.randomUUID().toString()
+        val totals = calculateDraftTotals(normalizedDraft.lines)
+
+        viewModelScope.launch {
+            invoiceRepository.upsertInvoice(
+                invoice = StoredInvoice(
+                    id = invoiceId,
+                    clientId = normalizedDraft.selectedClientId.orEmpty(),
+                    status = "Emitida",
+                    series = normalizedDraft.selectedSeries,
+                    number = normalizedDraft.nextNumberPreview,
+                    issueDate = normalizedDraft.issueDate,
+                    operationDate = normalizedDraft.operationDate,
+                    projectLabel = normalizedDraft.projectLabel,
+                    notes = normalizedDraft.notes,
+                    taxMode = normalizedDraft.taxMode,
+                    subtotal = formatCurrency(totals.subtotal),
+                    taxTotal = formatCurrency(totals.taxTotal),
+                    grandTotal = formatCurrency(totals.grandTotal),
+                    createdAt = System.currentTimeMillis(),
+                ),
+                lines = normalizedDraft.lines.toStoredInvoiceLines(invoiceId = invoiceId),
+            )
+            val freshDraft = normalizedDraft.nextFreshDraft()
+            draftRepository.upsertActiveDraft(
+                draft = freshDraft.toStoredDraft(),
+                lines = freshDraft.toStoredDraftLines(),
+            )
+            draftForm.value = freshDraft
+            pickingClientForDraft.value = false
+            pickingConceptForDraft.value = false
+            currentSection.value = LifacSection.INVOICES
+            events.emit("Factura guardada localmente.")
+        }
+    }
+
     companion object {
         fun provideFactory(context: Context): ViewModelProvider.Factory {
             val appContext = context.applicationContext
@@ -520,38 +593,12 @@ class LifacAppViewModel(
                     LifacAppViewModel(
                         clientRepository = RoomClientRepository.from(appContext),
                         conceptRepository = RoomConceptRepository.from(appContext),
+                        invoiceRepository = RoomInvoiceRepository.from(appContext),
                         draftRepository = RoomDraftRepository.from(appContext),
                     )
                 }
             }
         }
-
-        private val sampleInvoices = listOf(
-            InvoiceListItemUiState(
-                id = "invoice-1",
-                number = "2026-0007",
-                clientName = "Promociones Sierra Norte",
-                status = "Emitida",
-                total = "1.452,00 EUR",
-                date = "18/04/2026",
-            ),
-            InvoiceListItemUiState(
-                id = "invoice-2",
-                number = "2026-0006",
-                clientName = "Marta Ruiz",
-                status = "Borrador",
-                total = "484,00 EUR",
-                date = "17/04/2026",
-            ),
-            InvoiceListItemUiState(
-                id = "invoice-3",
-                number = "2026-0005",
-                clientName = "Reformas Bellavista SL",
-                status = "Emitida",
-                total = "2.904,00 EUR",
-                date = "15/04/2026",
-            ),
-        )
 
         private val sampleSeries = listOf(
             SeriesListItemUiState(code = "2026", nextNumber = "0008"),
@@ -597,10 +644,14 @@ private data class DraftTotals(
     val grandTotal: Double,
 )
 
-private data class UiBaseState(
+private data class UiCatalogState(
     val section: LifacSection,
     val storedClients: List<StoredClient>,
     val storedConcepts: List<StoredConcept>,
+    val storedInvoices: List<StoredInvoiceSummary>,
+)
+
+private data class UiFormState(
     val currentClientForm: ClientFormUiState,
     val currentConceptForm: ConceptFormUiState,
 )
@@ -630,6 +681,14 @@ internal fun validateConceptForm(form: ConceptFormUiState): String? {
 internal fun validateDraftLineEditor(editor: DraftLineEditorFormState): String? {
     return when {
         editor.description.isBlank() -> "La descripcion de la linea es obligatoria."
+        else -> null
+    }
+}
+
+internal fun validateDraftForInvoiceSave(draft: InvoiceDraftFormState): String? {
+    return when {
+        draft.selectedClientId.isNullOrBlank() -> "Selecciona un cliente antes de guardar la factura."
+        draft.lines.isEmpty() -> "Anade al menos una linea antes de guardar la factura."
         else -> null
     }
 }
@@ -695,6 +754,22 @@ private fun InvoiceDraftFormState.toStoredDraftLines(): List<StoredDraftLine> {
         .map { line ->
             StoredDraftLine(
                 id = line.id,
+                sortOrder = line.sortOrder,
+                description = line.description,
+                quantity = line.quantity,
+                unitPrice = line.unitPrice,
+                taxMode = line.taxMode,
+            )
+        }
+}
+
+private fun InvoiceDraftFormState.toStoredInvoiceLines(invoiceId: String): List<StoredInvoiceLine> {
+    return lines
+        .reindexed()
+        .map { line ->
+            StoredInvoiceLine(
+                id = UUID.randomUUID().toString(),
+                invoiceId = invoiceId,
                 sortOrder = line.sortOrder,
                 description = line.description,
                 quantity = line.quantity,
@@ -834,6 +909,28 @@ private fun formatConceptPrice(rawValue: String): String {
     } else {
         "$trimmed EUR"
     }
+}
+
+private fun InvoiceDraftFormState.nextFreshDraft(): InvoiceDraftFormState {
+    val nextPreview = incrementInvoicePreview(nextNumberPreview)
+    return InvoiceDraftFormState(
+        selectedSeries = selectedSeries,
+        nextNumberPreview = nextPreview,
+        issueDate = issueDate,
+        taxMode = taxMode,
+        lineEditor = defaultDraftLineEditor(taxMode),
+        hasPersistedDraft = false,
+    )
+}
+
+internal fun incrementInvoicePreview(currentPreview: String): String {
+    val digits = currentPreview.takeLastWhile { it.isDigit() }
+    if (digits.isEmpty()) {
+        return currentPreview
+    }
+    val prefix = currentPreview.dropLast(digits.length)
+    val nextValue = (digits.toIntOrNull() ?: return currentPreview) + 1
+    return prefix + nextValue.toString().padStart(digits.length, '0')
 }
 
 private fun List<DraftLineFormState>.reindexed(): List<DraftLineFormState> {

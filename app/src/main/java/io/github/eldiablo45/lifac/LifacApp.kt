@@ -75,6 +75,7 @@ fun LifacApp(
             onEditDraftLine = viewModel::editDraftLine,
             onRemoveDraftLine = viewModel::removeDraftLine,
             onResetDraftLineEditor = viewModel::resetDraftLineEditor,
+            onSaveInvoice = viewModel::saveInvoice,
             onSaveDraft = viewModel::saveDraft,
             onPlaceholderAction = { message ->
                 scope.launch {

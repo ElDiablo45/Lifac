@@ -36,13 +36,14 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
   - numeracion automatica por serie,
   - borradores guardables localmente,
   - PDF como salida final del flujo.
-- El estado actual de UI usa datos de ejemplo y placeholders intencionados en campos todavia no decididos.
-- El resto de secciones siguen usando datos de ejemplo, pero `Clientes` ya guarda datos reales en base local Room.
+- El estado actual de UI sigue usando placeholders intencionados en campos todavia no decididos.
+- `Clientes`, `Conceptos`, `Borradores` y `Facturas` ya usan persistencia local real; otras areas como `Ajustes` y PDF siguen en estado provisional.
 - El flujo de borrador de factura ya persiste un borrador activo local, reutiliza clientes reales y ya no depende de lineas de ejemplo.
 - El borrador activo ya persiste cliente, fechas, obra o referencia y observaciones.
 - El editor de `Nueva factura` ya permite crear, editar y eliminar lineas reales dentro del borrador activo.
 - Las lineas del borrador ya se guardan localmente junto con el borrador activo y recalculan subtotal, impuestos y total.
 - La seccion `Conceptos` ya guarda catalogo local real y puede reutilizar conceptos dentro del borrador activo.
+- Guardar factura ya persiste una entidad real en historial local y limpia el borrador activo para seguir facturando.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -94,7 +95,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
 - El MVP debe contemplar clientes empresa y clientes particular.
 - La propuesta actual separa los datos del cliente segun tipo, pero mantiene un unico flujo de facturacion.
-- La siguiente iteracion con mas valor ahora es convertir facturas guardadas e historial en entidades reales persistidas.
+- La siguiente iteracion con mas valor ahora es abrir o rehidratar facturas guardadas desde el historial, o generar PDF real a partir de ellas.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

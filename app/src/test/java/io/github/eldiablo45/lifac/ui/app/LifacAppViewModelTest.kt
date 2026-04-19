@@ -109,4 +109,30 @@ class LifacAppViewModelTest {
             validateConceptForm(form),
         )
     }
+
+    @Test
+    fun `validateDraftForInvoiceSave requires client`() {
+        val draft = InvoiceDraftFormState(
+            lines = listOf(
+                DraftLineFormState(
+                    id = "line-1",
+                    sortOrder = 0,
+                    description = "Demolicion interior",
+                    quantity = "1",
+                    unitPrice = "150,00",
+                    taxMode = "IVA 21%",
+                ),
+            ),
+        )
+
+        assertEquals(
+            "Selecciona un cliente antes de guardar la factura.",
+            validateDraftForInvoiceSave(draft),
+        )
+    }
+
+    @Test
+    fun `incrementInvoicePreview keeps padded numbering`() {
+        assertEquals("2026-0009", incrementInvoicePreview("2026-0008"))
+    }
 }
