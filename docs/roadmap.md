@@ -71,3 +71,15 @@ Y, en el corto plazo tecnico, cuando:
 ## Siguiente hito recomendado
 
 - [ ] Generar PDF real a partir de facturas persistidas o abrir factura en modo detalle.
+
+## Reanudacion rapida
+
+- Ultimo hito completado:
+  - [x] Reabrir una factura guardada desde historial como borrador editable.
+- Si retomamos desde aqui, empezar por una de estas dos rutas:
+  - [ ] Ruta A: generar PDF real desde factura persistida.
+  - [ ] Ruta B: crear pantalla de detalle de factura guardada y desde ahi exportar o duplicar.
+- Decisiones ya cerradas para continuar sin reanalizar:
+  - [x] Todo sigue siendo local-first.
+  - [x] El historial de `Facturas` ya no usa mocks.
+  - [x] El editor ya soporta ida y vuelta con facturas guardadas.

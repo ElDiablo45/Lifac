@@ -88,6 +88,30 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - La arquitectura debe mantenerse simple hasta que el producto real exija capas adicionales.
 - Este bootstrap ya debe considerarse el estado base estable desde el que arrancar el desarrollo del producto.
 
+## Punto de reanudacion
+
+- Ultimo hito completado: rehidratacion de una factura guardada desde `Facturas` al editor como borrador editable.
+- Estado funcional actual:
+  - `Clientes` persiste catalogo real.
+  - `Conceptos` persiste catalogo real y puede reutilizarse en el borrador.
+  - `Nueva factura` persiste borrador activo, lineas reales y totales.
+  - `Facturas` ya persiste historial real.
+  - Tocar una factura guardada ya la carga de nuevo en el editor.
+- Estado todavia pendiente:
+  - generacion real de PDF,
+  - pantalla de detalle de factura guardada,
+  - ajustes persistentes del emisor,
+  - backup exportable,
+  - refinamiento fiscal y de numeracion.
+- Ultimos commits relevantes:
+  - `8ae270c` persistencia de facturas reales e historial.
+  - `f260f3c` fix de helpers al guardar factura.
+  - `b1ce10a` rehidratacion de factura guardada al editor.
+- Siguiente paso recomendado:
+  - generar PDF real a partir de facturas persistidas.
+- Alternativa valida si se quiere seguir reforzando modelo antes de PDF:
+  - crear pantalla de detalle de factura guardada y desde ahi exportar o duplicar.
+
 ## Supuestos validos por ahora
 
 - `Lifac` es el nombre de la aplicacion por coincidir con el repositorio.
