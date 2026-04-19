@@ -11,6 +11,10 @@
 - Mantener catalogo local de clientes y catalogo local de productos o conceptos.
 - Generar un PDF final listo para compartir o archivar.
 - Guardar y consultar las facturas en almacenamiento local del dispositivo.
+- Soportar destinatarios empresa y particular.
+- Numerar facturas automaticamente por serie.
+- Reutilizar los datos del emisor desde ajustes persistentes.
+- Modelar cada linea como `concepto` en el MVP inicial.
 - Establecer una base tecnica moderna sobre la que el producto real pueda crecer sin retrabajo innecesario.
 
 ## No objetivos iniciales
@@ -70,6 +74,7 @@
 - Navegacion de la app y flujo principal.
 - Modelo de numeracion de facturas y series.
 - Casuistica fiscal exacta del MVP para construccion en Espana.
+- Datos exactos del emisor y del cliente que seran obligatorios u opcionales.
 - Entorno de despliegue y distribucion.
 - CI/CD.
 - Politicas de observabilidad, seguridad y configuracion.
@@ -110,6 +115,7 @@ Estado actual de validacion:
 - Definir el flujo exacto de facturacion para pequeno negocio.
 - Identificar datos obligatorios del emisor, cliente y factura.
 - Confirmar tratamiento fiscal inicial necesario para el primer usuario.
+- Definir numeracion automatica por serie y comportamiento de borradores.
 - Convertir incertidumbre en decisiones documentadas.
 
 ### Fase 3: Decisiones tecnicas de producto

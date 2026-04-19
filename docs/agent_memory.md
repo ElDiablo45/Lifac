@@ -17,9 +17,13 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - Producto actual: app para generar facturas de la forma mas sencilla posible.
 - Enfoque de datos: local-first, sin backend y sin subir datos operativos del usuario a servidores propios.
 - Primer usuario objetivo: pequeno negocio, concretamente una pequena constructora.
+- Los destinatarios de las facturas podran ser tanto empresas como particulares.
 - Salida principal del sistema: factura completa en PDF.
 - El sistema debe incluir desde el inicio catalogo local de clientes y catalogo local de productos o conceptos.
 - Debe soportar facturas completas con datos fiscales, IVA, serie o numero y fecha.
+- La numeracion debe ser automatica por serie desde el primer dia.
+- Los datos fijos del emisor deben guardarse en ajustes y reutilizarse sin pedirlos en cada factura.
+- Las lineas de factura se modelan inicialmente como `conceptos`, sin separar todavia entre producto y servicio.
 - Copias de seguridad exportables son deseables a futuro, con posibilidad prevista de backup a Google Drive.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
@@ -70,6 +74,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El identificador de paquete inicial puede derivarse del remoto GitHub y usarse temporalmente como `io.github.eldiablo45.lifac` hasta que exista uno definitivo.
 - La app se orienta solo a Android 16 o superior, por decision explicita del proyecto en esta etapa.
 - El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
+- El MVP debe contemplar clientes empresa y clientes particular.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

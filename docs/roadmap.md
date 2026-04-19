@@ -26,6 +26,9 @@
 - [ ] Diseñar la arquitectura funcional del producto sobre la base Android creada.
 - [ ] Diseñar la salida PDF inicial.
 - [ ] Confirmar casuistica fiscal minima del MVP para una pequena constructora en Espana.
+- [ ] Definir numeracion automatica por serie.
+- [ ] Definir ajustes persistentes del emisor.
+- [ ] Definir diferencias de captura entre cliente empresa y cliente particular.
 - [ ] Implementar el primer entregable funcional.
 - [ ] Configurar estrategia de testing.
 - [ ] Configurar flujo de integracion y despliegue.
