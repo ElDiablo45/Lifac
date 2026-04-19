@@ -570,7 +570,7 @@ class LifacAppViewModel(
                     grandTotal = formatCurrency(totals.grandTotal),
                     createdAt = System.currentTimeMillis(),
                 ),
-                lines = normalizedDraft.lines.toStoredInvoiceLines(invoiceId = invoiceId),
+                lines = normalizedDraft.toStoredInvoiceLines(invoiceId = invoiceId),
             )
             val freshDraft = normalizedDraft.nextFreshDraft()
             draftRepository.upsertActiveDraft(
@@ -897,7 +897,7 @@ private fun taxRateFor(taxMode: String): Double {
 }
 
 private fun formatCurrency(value: Double): String {
-    return String.format(Locale("es", "ES"), "%.2f EUR", value).replace('.', ',')
+    return String.format(Locale.forLanguageTag("es-ES"), "%.2f EUR", value).replace('.', ',')
 }
 
 private fun formatConceptPrice(rawValue: String): String {
