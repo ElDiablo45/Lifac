@@ -20,6 +20,7 @@
 - [x] Flujo util entre `Nueva factura` y `Clientes` para seleccionar cliente sin salir del contexto.
 - [x] Persistencia local del primer borrador activo de factura.
 - [x] Persistencia y edicion local de lineas reales dentro del borrador activo.
+- [x] Catalogo local de conceptos con reutilizacion desde el borrador.
 
 ## En curso
 
@@ -67,4 +68,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Persistir el catalogo real de conceptos y permitir anadirlos al borrador.
+- [ ] Persistir facturas reales e historial editable a partir del borrador actual.

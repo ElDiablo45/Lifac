@@ -60,9 +60,17 @@ fun LifacAppScreen(
     onClientNotesChanged: (String) -> Unit,
     onSaveClient: () -> Unit,
     onResetClientForm: () -> Unit,
+    onConceptNameChanged: (String) -> Unit,
+    onConceptDescriptionChanged: (String) -> Unit,
+    onConceptUnitPriceChanged: (String) -> Unit,
+    onConceptTaxModeChanged: (String) -> Unit,
+    onSaveConcept: () -> Unit,
+    onResetConceptForm: () -> Unit,
     onDraftClientSelected: (String) -> Unit,
     onPickClientForDraft: (String) -> Unit,
     onOpenClientsForDraft: () -> Unit,
+    onUseConceptForDraft: (String) -> Unit,
+    onOpenConceptsForDraft: () -> Unit,
     onReturnToDraftEditor: () -> Unit,
     onDraftIssueDateChanged: (String) -> Unit,
     onDraftOperationDateChanged: (String) -> Unit,
@@ -178,6 +186,16 @@ fun LifacAppScreen(
 
                 LifacSection.CONCEPTS -> ConceptsScreen(
                     concepts = uiState.concepts,
+                    form = uiState.conceptForm,
+                    isPickingConceptForDraft = uiState.isPickingConceptForDraft,
+                    onConceptNameChanged = onConceptNameChanged,
+                    onConceptDescriptionChanged = onConceptDescriptionChanged,
+                    onConceptUnitPriceChanged = onConceptUnitPriceChanged,
+                    onConceptTaxModeChanged = onConceptTaxModeChanged,
+                    onSaveConcept = onSaveConcept,
+                    onResetConceptForm = onResetConceptForm,
+                    onUseConceptForDraft = onUseConceptForDraft,
+                    onReturnToDraftEditor = onReturnToDraftEditor,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -194,6 +212,7 @@ fun LifacAppScreen(
                     clients = uiState.clients,
                     onDraftClientSelected = onDraftClientSelected,
                     onOpenClientsForDraft = onOpenClientsForDraft,
+                    onOpenConceptsForDraft = onOpenConceptsForDraft,
                     onDraftIssueDateChanged = onDraftIssueDateChanged,
                     onDraftOperationDateChanged = onDraftOperationDateChanged,
                     onDraftProjectLabelChanged = onDraftProjectLabelChanged,
@@ -558,6 +577,16 @@ private fun ClientsScreen(
 @Composable
 private fun ConceptsScreen(
     concepts: List<ConceptListItemUiState>,
+    form: ConceptFormUiState,
+    isPickingConceptForDraft: Boolean,
+    onConceptNameChanged: (String) -> Unit,
+    onConceptDescriptionChanged: (String) -> Unit,
+    onConceptUnitPriceChanged: (String) -> Unit,
+    onConceptTaxModeChanged: (String) -> Unit,
+    onSaveConcept: () -> Unit,
+    onResetConceptForm: () -> Unit,
+    onUseConceptForDraft: (String) -> Unit,
+    onReturnToDraftEditor: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -578,9 +607,98 @@ private fun ConceptsScreen(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "En este MVP cada linea sigue siendo un concepto. Producto o servicio se decidiran mas adelante si realmente aportan valor.",
+                        text = "Los conceptos ya se guardan en local y pueden reutilizarse para acelerar nuevas facturas.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (isPickingConceptForDraft) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FilledTonalButton(onClick = onReturnToDraftEditor) {
+                            Text("Volver a nueva factura")
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            ElevatedCard {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = "Nuevo concepto",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    OutlinedTextField(
+                        value = form.name,
+                        onValueChange = onConceptNameChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Nombre corto") },
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = form.description,
+                        onValueChange = onConceptDescriptionChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Descripcion por defecto") },
+                        placeholder = { Text("Placeholder: texto que ira a la linea de factura") },
+                    )
+                    OutlinedTextField(
+                        value = form.unitPrice,
+                        onValueChange = onConceptUnitPriceChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Precio por defecto") },
+                        placeholder = { Text("Ejemplo: 220,00") },
+                        singleLine = true,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = form.taxMode == "IVA 21%",
+                            onClick = { onConceptTaxModeChanged("IVA 21%") },
+                            label = { Text("IVA 21%") },
+                        )
+                        FilterChip(
+                            selected = form.taxMode == "IVA 10%",
+                            onClick = { onConceptTaxModeChanged("IVA 10%") },
+                            label = { Text("IVA 10%") },
+                        )
+                        FilterChip(
+                            selected = form.taxMode == "ISP",
+                            onClick = { onConceptTaxModeChanged("ISP") },
+                            label = { Text("ISP") },
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FilledTonalButton(onClick = onSaveConcept) {
+                            Text("Guardar concepto")
+                        }
+                        OutlinedButton(onClick = onResetConceptForm) {
+                            Text("Limpiar")
+                        }
+                    }
+                }
+            }
+        }
+
+        if (concepts.isEmpty()) {
+            item {
+                ElevatedCard {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "Aun no hay conceptos guardados",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            text = "Crea el primero para reutilizarlo luego al generar facturas.",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                 }
             }
         }
@@ -588,15 +706,21 @@ private fun ConceptsScreen(
         items(concepts, key = { it.id }) { concept ->
             ElevatedCard(
                 onClick = {
-                    onPlaceholderAction("Edicion de concepto pendiente de persistencia local.")
+                    if (isPickingConceptForDraft) {
+                        onUseConceptForDraft(concept.id)
+                    } else {
+                        onPlaceholderAction("La edicion detallada de conceptos llegara en una siguiente iteracion.")
+                    }
                 },
             ) {
                 ListItem(
                     headlineContent = { Text(concept.name) },
-                    supportingContent = { Text("${concept.price} · ${concept.taxLabel}") },
+                    supportingContent = {
+                        Text("${concept.description} · ${concept.price} · ${concept.taxLabel}")
+                    },
                     trailingContent = {
                         Text(
-                            text = "Usar",
+                            text = if (isPickingConceptForDraft) "Usar" else "Disponible",
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                         )
@@ -683,6 +807,7 @@ private fun InvoiceEditorScreen(
     clients: List<ClientListItemUiState>,
     onDraftClientSelected: (String) -> Unit,
     onOpenClientsForDraft: () -> Unit,
+    onOpenConceptsForDraft: () -> Unit,
     onDraftIssueDateChanged: (String) -> Unit,
     onDraftOperationDateChanged: (String) -> Unit,
     onDraftProjectLabelChanged: (String) -> Unit,
@@ -892,6 +1017,11 @@ private fun InvoiceEditorScreen(
                     FilledTonalButton(onClick = onSaveDraftLine) {
                         Text(draft.lineEditor.actionLabel)
                     }
+                    OutlinedButton(onClick = onOpenConceptsForDraft) {
+                        Text("Usar guardado")
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onResetDraftLineEditor) {
                         Text("Limpiar linea")
                     }
@@ -1162,9 +1292,17 @@ private fun LifacAppScreenPreview() {
             onClientNotesChanged = {},
             onSaveClient = {},
             onResetClientForm = {},
+            onConceptNameChanged = {},
+            onConceptDescriptionChanged = {},
+            onConceptUnitPriceChanged = {},
+            onConceptTaxModeChanged = {},
+            onSaveConcept = {},
+            onResetConceptForm = {},
             onDraftClientSelected = {},
             onPickClientForDraft = {},
             onOpenClientsForDraft = {},
+            onUseConceptForDraft = {},
+            onOpenConceptsForDraft = {},
             onReturnToDraftEditor = {},
             onDraftIssueDateChanged = {},
             onDraftOperationDateChanged = {},

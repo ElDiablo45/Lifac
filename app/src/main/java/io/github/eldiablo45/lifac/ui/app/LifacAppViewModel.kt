@@ -10,6 +10,9 @@ import io.github.eldiablo45.lifac.data.client.ClientRepository
 import io.github.eldiablo45.lifac.data.client.ClientType
 import io.github.eldiablo45.lifac.data.client.RoomClientRepository
 import io.github.eldiablo45.lifac.data.client.StoredClient
+import io.github.eldiablo45.lifac.data.concept.ConceptRepository
+import io.github.eldiablo45.lifac.data.concept.RoomConceptRepository
+import io.github.eldiablo45.lifac.data.concept.StoredConcept
 import io.github.eldiablo45.lifac.data.draft.DraftRepository
 import io.github.eldiablo45.lifac.data.draft.RoomDraftRepository
 import io.github.eldiablo45.lifac.data.draft.StoredDraftBundle
@@ -29,12 +32,15 @@ import kotlinx.coroutines.launch
 
 class LifacAppViewModel(
     private val clientRepository: ClientRepository,
+    private val conceptRepository: ConceptRepository,
     private val draftRepository: DraftRepository,
 ) : ViewModel() {
     private val currentSection = MutableStateFlow(LifacSection.HOME)
     private val clientForm = MutableStateFlow(ClientFormUiState())
+    private val conceptForm = MutableStateFlow(ConceptFormUiState())
     private val draftForm = MutableStateFlow(defaultDraftForm())
     private val pickingClientForDraft = MutableStateFlow(false)
+    private val pickingConceptForDraft = MutableStateFlow(false)
     private val events = MutableSharedFlow<String>()
 
     val uiEvents = events.asSharedFlow()
@@ -50,10 +56,13 @@ class LifacAppViewModel(
     val uiState: StateFlow<LifacAppUiState> = combine(
         currentSection,
         clientRepository.observeClients(),
+        conceptRepository.observeConcepts(),
         clientForm,
+        conceptForm,
         draftForm,
         pickingClientForDraft,
-    ) { section, storedClients, form, draft, isPickingClientForDraft ->
+        pickingConceptForDraft,
+    ) { section, storedClients, storedConcepts, currentClientForm, currentConceptForm, draft, isPickingClient, isPickingConcept ->
         val mappedClients = storedClients.map { storedClient ->
             ClientListItemUiState(
                 id = storedClient.id,
@@ -68,6 +77,15 @@ class LifacAppViewModel(
                 notes = storedClient.notes,
             )
         }
+        val mappedConcepts = storedConcepts.map { storedConcept ->
+            ConceptListItemUiState(
+                id = storedConcept.id,
+                name = storedConcept.name,
+                description = storedConcept.description.ifBlank { "Descripcion pendiente" },
+                price = formatConceptPrice(storedConcept.unitPrice),
+                taxLabel = storedConcept.taxMode,
+            )
+        }
         val selectedClient = mappedClients.firstOrNull { it.id == draft.selectedClientId }
         val draftLines = draft.lines
             .sortedBy { it.sortOrder }
@@ -79,7 +97,7 @@ class LifacAppViewModel(
             emitter = EmitterProfileUiState(),
             invoices = sampleInvoices,
             clients = mappedClients,
-            concepts = sampleConcepts,
+            concepts = mappedConcepts,
             series = sampleSeries,
             draft = InvoiceDraftUiState(
                 selectedClientId = selectedClient?.id,
@@ -113,8 +131,10 @@ class LifacAppViewModel(
                 grandTotal = formatCurrency(totals.grandTotal),
                 hasPersistedDraft = draft.hasPersistedDraft,
             ),
-            clientForm = form,
-            isPickingClientForDraft = isPickingClientForDraft,
+            clientForm = currentClientForm,
+            conceptForm = currentConceptForm,
+            isPickingClientForDraft = isPickingClient,
+            isPickingConceptForDraft = isPickingConcept,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -122,7 +142,7 @@ class LifacAppViewModel(
         initialValue = LifacAppUiState(
             emitter = EmitterProfileUiState(),
             invoices = sampleInvoices,
-            concepts = sampleConcepts,
+            concepts = emptyList(),
             series = sampleSeries,
             draft = InvoiceDraftUiState(
                 concepts = emptyList(),
@@ -133,6 +153,7 @@ class LifacAppViewModel(
                 hasPersistedDraft = false,
             ),
             clientForm = ClientFormUiState(),
+            conceptForm = ConceptFormUiState(),
         ),
     )
 
@@ -141,15 +162,20 @@ class LifacAppViewModel(
         if (section != LifacSection.CLIENTS) {
             pickingClientForDraft.value = false
         }
+        if (section != LifacSection.CONCEPTS) {
+            pickingConceptForDraft.value = false
+        }
     }
 
     fun openNewInvoice() {
         pickingClientForDraft.value = false
+        pickingConceptForDraft.value = false
         navigateTo(LifacSection.INVOICE_EDITOR)
     }
 
     fun leaveEditor() {
         pickingClientForDraft.value = false
+        pickingConceptForDraft.value = false
         navigateTo(LifacSection.HOME)
     }
 
@@ -171,13 +197,38 @@ class LifacAppViewModel(
         }
     }
 
+    fun openConceptsForDraft() {
+        pickingConceptForDraft.value = true
+        navigateTo(LifacSection.CONCEPTS)
+        viewModelScope.launch {
+            events.emit("Selecciona un concepto guardado para anadirlo al borrador.")
+        }
+    }
+
     fun returnToDraftEditor() {
         pickingClientForDraft.value = false
+        pickingConceptForDraft.value = false
         navigateTo(LifacSection.INVOICE_EDITOR)
     }
 
     fun updateClientKind(kind: ClientType) {
         clientForm.update { current -> current.copy(kind = kind) }
+    }
+
+    fun updateConceptName(value: String) {
+        conceptForm.update { current -> current.copy(name = value) }
+    }
+
+    fun updateConceptDescription(value: String) {
+        conceptForm.update { current -> current.copy(description = value) }
+    }
+
+    fun updateConceptUnitPrice(value: String) {
+        conceptForm.update { current -> current.copy(unitPrice = value) }
+    }
+
+    fun updateConceptTaxMode(value: String) {
+        conceptForm.update { current -> current.copy(taxMode = value) }
     }
 
     fun updateDraftIssueDate(value: String) {
@@ -207,33 +258,25 @@ class LifacAppViewModel(
 
     fun updateDraftLineDescription(value: String) {
         draftForm.update { current ->
-            current.copy(
-                lineEditor = current.lineEditor.copy(description = value),
-            )
+            current.copy(lineEditor = current.lineEditor.copy(description = value))
         }
     }
 
     fun updateDraftLineQuantity(value: String) {
         draftForm.update { current ->
-            current.copy(
-                lineEditor = current.lineEditor.copy(quantity = value),
-            )
+            current.copy(lineEditor = current.lineEditor.copy(quantity = value))
         }
     }
 
     fun updateDraftLineUnitPrice(value: String) {
         draftForm.update { current ->
-            current.copy(
-                lineEditor = current.lineEditor.copy(unitPrice = value),
-            )
+            current.copy(lineEditor = current.lineEditor.copy(unitPrice = value))
         }
     }
 
     fun resetDraftLineEditor() {
         draftForm.update { current ->
-            current.copy(
-                lineEditor = defaultDraftLineEditor(current.taxMode),
-            )
+            current.copy(lineEditor = defaultDraftLineEditor(current.taxMode))
         }
     }
 
@@ -270,6 +313,37 @@ class LifacAppViewModel(
         }
         viewModelScope.launch {
             events.emit("Linea eliminada del borrador.")
+        }
+    }
+
+    fun useConceptInDraft(conceptId: String) {
+        val selectedConcept = uiState.value.concepts.firstOrNull { it.id == conceptId }
+        if (selectedConcept == null) {
+            viewModelScope.launch {
+                events.emit("No se encontro el concepto seleccionado.")
+            }
+            return
+        }
+
+        draftForm.update { current ->
+            val newLine = DraftLineFormState(
+                id = UUID.randomUUID().toString(),
+                sortOrder = 0,
+                description = selectedConcept.description.ifBlank { selectedConcept.name },
+                quantity = "1",
+                unitPrice = selectedConcept.price.removeSuffix(" EUR"),
+                taxMode = selectedConcept.taxLabel,
+            )
+            current.copy(
+                taxMode = selectedConcept.taxLabel,
+                lines = (current.lines + newLine).reindexed(),
+                lineEditor = defaultDraftLineEditor(selectedConcept.taxLabel),
+            )
+        }
+        pickingConceptForDraft.value = false
+        navigateTo(LifacSection.INVOICE_EDITOR)
+        viewModelScope.launch {
+            events.emit("Concepto anadido al borrador.")
         }
     }
 
@@ -338,6 +412,10 @@ class LifacAppViewModel(
         clientForm.value = ClientFormUiState(kind = clientForm.value.kind)
     }
 
+    fun resetConceptForm() {
+        conceptForm.value = ConceptFormUiState(taxMode = conceptForm.value.taxMode)
+    }
+
     fun saveClient() {
         val normalizedForm = clientForm.value.normalized()
         val validationError = validateClientForm(normalizedForm)
@@ -378,6 +456,32 @@ class LifacAppViewModel(
         }
     }
 
+    fun saveConcept() {
+        val normalizedForm = conceptForm.value.normalized()
+        val validationError = validateConceptForm(normalizedForm)
+
+        if (validationError != null) {
+            viewModelScope.launch {
+                events.emit(validationError)
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            conceptRepository.upsertConcept(
+                StoredConcept(
+                    id = UUID.randomUUID().toString(),
+                    name = normalizedForm.name,
+                    description = normalizedForm.description,
+                    unitPrice = normalizedForm.unitPrice,
+                    taxMode = normalizedForm.taxMode,
+                ),
+            )
+            conceptForm.value = ConceptFormUiState(taxMode = normalizedForm.taxMode)
+            events.emit("Concepto guardado localmente.")
+        }
+    }
+
     fun saveDraft() {
         val draftToSave = draftForm.value.normalized()
 
@@ -398,6 +502,7 @@ class LifacAppViewModel(
                 initializer {
                     LifacAppViewModel(
                         clientRepository = RoomClientRepository.from(appContext),
+                        conceptRepository = RoomConceptRepository.from(appContext),
                         draftRepository = RoomDraftRepository.from(appContext),
                     )
                 }
@@ -428,27 +533,6 @@ class LifacAppViewModel(
                 status = "Emitida",
                 total = "2.904,00 EUR",
                 date = "15/04/2026",
-            ),
-        )
-
-        private val sampleConcepts = listOf(
-            ConceptListItemUiState(
-                id = "concept-1",
-                name = "Jornada de obra",
-                price = "220,00 EUR",
-                taxLabel = "IVA 21%",
-            ),
-            ConceptListItemUiState(
-                id = "concept-2",
-                name = "Material auxiliar",
-                price = "45,00 EUR",
-                taxLabel = "IVA 21%",
-            ),
-            ConceptListItemUiState(
-                id = "concept-3",
-                name = "Reforma vivienda",
-                price = "Placeholder",
-                taxLabel = "IVA 10%",
             ),
         )
 
@@ -510,6 +594,14 @@ internal fun validateClientForm(form: ClientFormUiState): String? {
     }
 }
 
+internal fun validateConceptForm(form: ConceptFormUiState): String? {
+    return when {
+        form.name.isBlank() -> "El nombre del concepto es obligatorio."
+        form.description.isBlank() -> "La descripcion del concepto es obligatoria."
+        else -> null
+    }
+}
+
 internal fun validateDraftLineEditor(editor: DraftLineEditorFormState): String? {
     return when {
         editor.description.isBlank() -> "La descripcion de la linea es obligatoria."
@@ -524,6 +616,14 @@ private fun ClientFormUiState.normalized(): ClientFormUiState {
         city = city.trim(),
         address = address.trim(),
         notes = notes.trim(),
+    )
+}
+
+private fun ConceptFormUiState.normalized(): ConceptFormUiState {
+    return copy(
+        name = name.trim(),
+        description = description.trim(),
+        unitPrice = unitPrice.trim(),
     )
 }
 
@@ -698,6 +798,17 @@ private fun taxRateFor(taxMode: String): Double {
 
 private fun formatCurrency(value: Double): String {
     return String.format(Locale("es", "ES"), "%.2f EUR", value).replace('.', ',')
+}
+
+private fun formatConceptPrice(rawValue: String): String {
+    val trimmed = rawValue.trim()
+    return if (trimmed.isBlank()) {
+        "0,00 EUR"
+    } else if (trimmed.endsWith("EUR")) {
+        trimmed
+    } else {
+        "$trimmed EUR"
+    }
 }
 
 private fun List<DraftLineFormState>.reindexed(): List<DraftLineFormState> {

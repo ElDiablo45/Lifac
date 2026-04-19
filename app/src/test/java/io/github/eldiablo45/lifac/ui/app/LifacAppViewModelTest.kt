@@ -99,4 +99,14 @@ class LifacAppViewModelTest {
             validateDraftLineEditor(editor),
         )
     }
+
+    @Test
+    fun `validateConceptForm rejects blank name`() {
+        val form = ConceptFormUiState(name = " ", description = "Material de agarre")
+
+        assertEquals(
+            "El nombre del concepto es obligatorio.",
+            validateConceptForm(form),
+        )
+    }
 }

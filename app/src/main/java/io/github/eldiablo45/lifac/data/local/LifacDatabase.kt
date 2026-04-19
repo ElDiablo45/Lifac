@@ -8,12 +8,13 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [ClientEntity::class, InvoiceDraftEntity::class, DraftLineEntity::class],
-    version = 3,
+    entities = [ClientEntity::class, ConceptEntity::class, InvoiceDraftEntity::class, DraftLineEntity::class],
+    version = 4,
     exportSchema = false,
 )
 abstract class LifacDatabase : RoomDatabase() {
     abstract fun clientDao(): ClientDao
+    abstract fun conceptDao(): ConceptDao
     abstract fun draftDao(): DraftDao
 
     companion object {
@@ -64,13 +65,30 @@ abstract class LifacDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `concepts` (
+                        `id` TEXT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `description` TEXT NOT NULL,
+                        `unitPrice` TEXT NOT NULL,
+                        `taxMode` TEXT NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent(),
+                )
+            }
+        }
+
         fun getInstance(context: Context): LifacDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
                     context.applicationContext,
                     LifacDatabase::class.java,
                     "lifac.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build()
                     .also { INSTANCE = it }
             }

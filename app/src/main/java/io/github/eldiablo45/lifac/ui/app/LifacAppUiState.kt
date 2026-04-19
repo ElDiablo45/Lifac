@@ -28,7 +28,9 @@ data class LifacAppUiState(
     val series: List<SeriesListItemUiState> = emptyList(),
     val draft: InvoiceDraftUiState = InvoiceDraftUiState(),
     val clientForm: ClientFormUiState = ClientFormUiState(),
+    val conceptForm: ConceptFormUiState = ConceptFormUiState(),
     val isPickingClientForDraft: Boolean = false,
+    val isPickingConceptForDraft: Boolean = false,
 )
 
 data class EmitterProfileUiState(
@@ -70,8 +72,16 @@ data class ClientFormUiState(
 data class ConceptListItemUiState(
     val id: String,
     val name: String,
+    val description: String,
     val price: String,
     val taxLabel: String,
+)
+
+data class ConceptFormUiState(
+    val name: String = "",
+    val description: String = "",
+    val unitPrice: String = "",
+    val taxMode: String = "IVA 21%",
 )
 
 data class SeriesListItemUiState(

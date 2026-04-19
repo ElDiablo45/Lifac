@@ -309,4 +309,5 @@ Estado actual de validacion:
 - El flujo de cliente ya permite saltar a `Clientes` y regresar al borrador con la seleccion aplicada.
 - `Nueva factura` ya guarda y recarga un borrador activo local con campos principales.
 - `Nueva factura` ya permite editar lineas reales del borrador y recalcula totales locales basicos.
+- `Conceptos` ya permite alta local de conceptos reutilizables y aplicarlos al borrador activo.
 - La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.
