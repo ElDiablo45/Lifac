@@ -5,6 +5,7 @@ import androidx.room.withTransaction
 import io.github.eldiablo45.lifac.data.local.InvoiceEntity
 import io.github.eldiablo45.lifac.data.local.InvoiceLineEntity
 import io.github.eldiablo45.lifac.data.local.InvoiceSummaryRow
+import io.github.eldiablo45.lifac.data.local.InvoiceWithLines
 import io.github.eldiablo45.lifac.data.local.LifacDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -16,6 +17,10 @@ class RoomInvoiceRepository(
         return database.invoiceDao().observeInvoiceSummaries().map { rows ->
             rows.map { row -> row.toStoredSummary() }
         }
+    }
+
+    override suspend fun getInvoiceBundle(invoiceId: String): StoredInvoiceBundle? {
+        return database.invoiceDao().getInvoiceById(invoiceId)?.toStoredBundle()
     }
 
     override suspend fun upsertInvoice(
@@ -76,5 +81,39 @@ private fun InvoiceSummaryRow.toStoredSummary(): StoredInvoiceSummary {
         total = total,
         issueDate = issueDate,
         createdAt = createdAt,
+    )
+}
+
+private fun InvoiceWithLines.toStoredBundle(): StoredInvoiceBundle {
+    return StoredInvoiceBundle(
+        invoice = StoredInvoice(
+            id = invoice.id,
+            clientId = invoice.clientId,
+            status = invoice.status,
+            series = invoice.series,
+            number = invoice.number,
+            issueDate = invoice.issueDate,
+            operationDate = invoice.operationDate,
+            projectLabel = invoice.projectLabel,
+            notes = invoice.notes,
+            taxMode = invoice.taxMode,
+            subtotal = invoice.subtotal,
+            taxTotal = invoice.taxTotal,
+            grandTotal = invoice.grandTotal,
+            createdAt = invoice.createdAt,
+        ),
+        lines = lines
+            .sortedBy { it.sortOrder }
+            .map { line ->
+                StoredInvoiceLine(
+                    id = line.id,
+                    invoiceId = line.invoiceId,
+                    sortOrder = line.sortOrder,
+                    description = line.description,
+                    quantity = line.quantity,
+                    unitPrice = line.unitPrice,
+                    taxMode = line.taxMode,
+                )
+            },
     )
 }

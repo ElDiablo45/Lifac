@@ -4,6 +4,9 @@ import io.github.eldiablo45.lifac.data.client.ClientType
 import io.github.eldiablo45.lifac.data.draft.StoredDraftBundle
 import io.github.eldiablo45.lifac.data.draft.StoredDraftLine
 import io.github.eldiablo45.lifac.data.draft.StoredInvoiceDraft
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoice
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceBundle
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceLine
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -134,5 +137,46 @@ class LifacAppViewModelTest {
     @Test
     fun `incrementInvoicePreview keeps padded numbering`() {
         assertEquals("2026-0009", incrementInvoicePreview("2026-0008"))
+    }
+
+    @Test
+    fun `stored invoice maps into editable draft with incremented number`() {
+        val invoiceBundle = StoredInvoiceBundle(
+            invoice = StoredInvoice(
+                id = "invoice-1",
+                clientId = "client-1",
+                status = "Emitida",
+                series = "2026",
+                number = "2026-0008",
+                issueDate = "20/04/2026",
+                operationDate = "20/04/2026",
+                projectLabel = "Obra Norte",
+                notes = "Nota final",
+                taxMode = "IVA 21%",
+                subtotal = "150,00 EUR",
+                taxTotal = "31,50 EUR",
+                grandTotal = "181,50 EUR",
+                createdAt = 1L,
+            ),
+            lines = listOf(
+                StoredInvoiceLine(
+                    id = "line-1",
+                    invoiceId = "invoice-1",
+                    sortOrder = 0,
+                    description = "Demolicion",
+                    quantity = "1",
+                    unitPrice = "150,00",
+                    taxMode = "IVA 21%",
+                ),
+            ),
+        )
+
+        val draft = invoiceBundle.toDraftFormState()
+
+        assertEquals("client-1", draft.selectedClientId)
+        assertEquals("2026-0009", draft.nextNumberPreview)
+        assertEquals("Obra Norte", draft.projectLabel)
+        assertEquals(1, draft.lines.size)
+        assertEquals("Demolicion", draft.lines.single().description)
     }
 }

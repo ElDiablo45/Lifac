@@ -311,4 +311,5 @@ Estado actual de validacion:
 - `Nueva factura` ya permite editar lineas reales del borrador y recalcula totales locales basicos.
 - `Conceptos` ya permite alta local de conceptos reutilizables y aplicarlos al borrador activo.
 - `Facturas` ya puede mostrar historial real persistido a partir de facturas guardadas desde el borrador.
+- Tocar una factura del historial ya permite cargarla al editor como borrador editable.
 - La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.

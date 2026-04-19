@@ -20,6 +20,7 @@ import io.github.eldiablo45.lifac.data.draft.StoredDraftLine
 import io.github.eldiablo45.lifac.data.draft.StoredInvoiceDraft
 import io.github.eldiablo45.lifac.data.invoice.InvoiceRepository
 import io.github.eldiablo45.lifac.data.invoice.RoomInvoiceRepository
+import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceBundle
 import io.github.eldiablo45.lifac.data.invoice.StoredInvoice
 import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceLine
 import io.github.eldiablo45.lifac.data.invoice.StoredInvoiceSummary
@@ -220,6 +221,27 @@ class LifacAppViewModel(
         pickingClientForDraft.value = false
         pickingConceptForDraft.value = false
         navigateTo(LifacSection.HOME)
+    }
+
+    fun openSavedInvoice(invoiceId: String) {
+        viewModelScope.launch {
+            val storedInvoice = invoiceRepository.getInvoiceBundle(invoiceId)
+            if (storedInvoice == null) {
+                events.emit("No se pudo cargar la factura seleccionada.")
+                return@launch
+            }
+
+            val draftFromInvoice = storedInvoice.toDraftFormState()
+            draftRepository.upsertActiveDraft(
+                draft = draftFromInvoice.toStoredDraft(),
+                lines = draftFromInvoice.toStoredDraftLines(),
+            )
+            draftForm.value = draftFromInvoice
+            pickingClientForDraft.value = false
+            pickingConceptForDraft.value = false
+            currentSection.value = LifacSection.INVOICE_EDITOR
+            events.emit("Factura cargada como borrador editable.")
+        }
     }
 
     fun selectDraftClient(clientId: String) {
@@ -804,6 +826,38 @@ internal fun StoredDraftBundle.toDraftFormState(): InvoiceDraftFormState {
         projectLabel = draft.projectLabel,
         notes = draft.notes,
         taxMode = draft.taxMode,
+        lines = normalizedLines,
+        lineEditor = defaultDraftLineEditor(lastTaxMode),
+        hasPersistedDraft = true,
+    )
+}
+
+internal fun StoredInvoiceBundle.toDraftFormState(): InvoiceDraftFormState {
+    val normalizedLines = lines
+        .sortedBy { it.sortOrder }
+        .map { line ->
+            DraftLineFormState(
+                id = UUID.randomUUID().toString(),
+                sortOrder = line.sortOrder,
+                description = line.description,
+                quantity = line.quantity,
+                unitPrice = line.unitPrice,
+                taxMode = line.taxMode,
+            )
+        }
+        .reindexed()
+    val nextPreview = incrementInvoicePreview(invoice.number)
+    val lastTaxMode = normalizedLines.lastOrNull()?.taxMode ?: invoice.taxMode
+
+    return InvoiceDraftFormState(
+        selectedClientId = invoice.clientId,
+        selectedSeries = invoice.series,
+        nextNumberPreview = nextPreview,
+        issueDate = invoice.issueDate,
+        operationDate = invoice.operationDate,
+        projectLabel = invoice.projectLabel,
+        notes = invoice.notes,
+        taxMode = invoice.taxMode,
         lines = normalizedLines,
         lineEditor = defaultDraftLineEditor(lastTaxMode),
         hasPersistedDraft = true,

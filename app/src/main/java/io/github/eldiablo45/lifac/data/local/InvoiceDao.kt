@@ -2,6 +2,7 @@ package io.github.eldiablo45.lifac.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -23,6 +24,10 @@ interface InvoiceDao {
         """,
     )
     fun observeInvoiceSummaries(): Flow<List<InvoiceSummaryRow>>
+
+    @Transaction
+    @Query("SELECT * FROM invoices WHERE id = :invoiceId LIMIT 1")
+    suspend fun getInvoiceById(invoiceId: String): InvoiceWithLines?
 
     @Upsert
     suspend fun upsertInvoice(invoice: InvoiceEntity)

@@ -44,6 +44,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - Las lineas del borrador ya se guardan localmente junto con el borrador activo y recalculan subtotal, impuestos y total.
 - La seccion `Conceptos` ya guarda catalogo local real y puede reutilizar conceptos dentro del borrador activo.
 - Guardar factura ya persiste una entidad real en historial local y limpia el borrador activo para seguir facturando.
+- El historial de `Facturas` ya puede rehidratar una factura guardada como borrador editable.
 - Plataforma objetivo inicial: Android 16 como base operativa, con compilacion preparada contra Android 17.
 - Configuracion SDK actual:
   - `minSdk = 36` para soportar solo Android 16 o superior,
@@ -95,7 +96,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El MVP deberia centrarse en crear factura, guardar borrador, generar PDF y consultar historial local.
 - El MVP debe contemplar clientes empresa y clientes particular.
 - La propuesta actual separa los datos del cliente segun tipo, pero mantiene un unico flujo de facturacion.
-- La siguiente iteracion con mas valor ahora es abrir o rehidratar facturas guardadas desde el historial, o generar PDF real a partir de ellas.
+- La siguiente iteracion con mas valor ahora es generar PDF real a partir de facturas persistidas o abrir facturas guardadas en modo detalle.
 - Salvo confirmacion posterior, la politica inicial de datos es "todo se queda en el dispositivo" y cualquier backup externo debe ser accion explicita del usuario.
 
 ## Disparadores de actualizacion

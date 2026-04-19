@@ -42,6 +42,7 @@ fun LifacApp(
             snackbarHostState = snackbarHostState,
             onNavigate = viewModel::navigateTo,
             onOpenNewInvoice = viewModel::openNewInvoice,
+            onOpenSavedInvoice = viewModel::openSavedInvoice,
             onBackFromEditor = viewModel::leaveEditor,
             onClientKindSelected = viewModel::updateClientKind,
             onClientDisplayNameChanged = viewModel::updateClientDisplayName,

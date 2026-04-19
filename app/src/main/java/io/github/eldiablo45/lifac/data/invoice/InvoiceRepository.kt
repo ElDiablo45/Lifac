@@ -39,8 +39,15 @@ data class StoredInvoiceLine(
     val taxMode: String,
 )
 
+data class StoredInvoiceBundle(
+    val invoice: StoredInvoice,
+    val lines: List<StoredInvoiceLine>,
+)
+
 interface InvoiceRepository {
     fun observeInvoiceSummaries(): Flow<List<StoredInvoiceSummary>>
+
+    suspend fun getInvoiceBundle(invoiceId: String): StoredInvoiceBundle?
 
     suspend fun upsertInvoice(
         invoice: StoredInvoice,

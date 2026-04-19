@@ -51,6 +51,7 @@ fun LifacAppScreen(
     snackbarHostState: SnackbarHostState,
     onNavigate: (LifacSection) -> Unit,
     onOpenNewInvoice: () -> Unit,
+    onOpenSavedInvoice: (String) -> Unit,
     onBackFromEditor: () -> Unit,
     onClientKindSelected: (ClientType) -> Unit,
     onClientDisplayNameChanged: (String) -> Unit,
@@ -163,6 +164,7 @@ fun LifacAppScreen(
                 LifacSection.INVOICES -> InvoicesScreen(
                     invoices = uiState.invoices,
                     onOpenNewInvoice = onOpenNewInvoice,
+                    onOpenSavedInvoice = onOpenSavedInvoice,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -330,6 +332,7 @@ private fun HomeScreen(
 private fun InvoicesScreen(
     invoices: List<InvoiceListItemUiState>,
     onOpenNewInvoice: () -> Unit,
+    onOpenSavedInvoice: (String) -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -393,9 +396,7 @@ private fun InvoicesScreen(
         items(invoices, key = { it.id }) { invoice ->
             InvoiceRowCard(
                 invoice = invoice,
-                onClick = {
-                    onPlaceholderAction("Abrir y editar factura guardada llegara en la siguiente iteracion.")
-                },
+                onClick = { onOpenSavedInvoice(invoice.id) },
             )
         }
     }
@@ -1312,6 +1313,7 @@ private fun LifacAppScreenPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onNavigate = {},
             onOpenNewInvoice = {},
+            onOpenSavedInvoice = {},
             onBackFromEditor = {},
             onClientKindSelected = {},
             onClientDisplayNameChanged = {},
