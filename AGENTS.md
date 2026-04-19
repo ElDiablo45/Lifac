@@ -18,7 +18,8 @@ Este archivo es el indice operativo del repositorio. Define el orden de lectura,
 - Stack base confirmado: Kotlin, Jetpack Compose, Material 3, Gradle Kotlin DSL y version catalog.
 - Wrapper de Gradle incluido en el repo.
 - Existe una primera pantalla `Hello World` como bootstrap funcional.
-- La validacion completa de sync y build sigue dependiendo de comprobar el entorno local de Android Studio.
+- Estado base validado en Android Studio y ejecutado correctamente en un movil real.
+- El estado actual incluye ajustes aplicados por Android Studio al tooling del proyecto.
 
 ## Reglas operativas del proyecto
 

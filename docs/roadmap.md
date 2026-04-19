@@ -10,11 +10,13 @@
 - [x] Definicion de objetivo tecnico inicial: base moderna para Android 16.
 - [x] Creacion del bootstrap Android con Gradle Kotlin DSL, wrapper y modulo `app`.
 - [x] Implementacion de una primera pantalla `Hello World` en Compose.
+- [x] Validacion del proyecto en Android Studio.
+- [x] Ejecucion correcta de la app en un movil real.
+- [x] Consolidacion del bootstrap actual como estado base del repositorio.
 
 ## En curso
 
 - [ ] Consolidar una definicion minima del producto `Lifac`.
-- [ ] Validar el primer sync y build en Android Studio.
 
 ## Pendiente
 
@@ -27,8 +29,8 @@
 ## Riesgos abiertos
 
 - [ ] El producto real sigue sin estar definido mas alla de ser una app Android.
-- [ ] El `minSdk` definitivo sigue siendo un supuesto tecnico hasta conocer objetivos comerciales.
-- [ ] La shell actual no expone JDK ni Gradle, asi que la validacion inicial puede depender del IDE.
+- [ ] El `minSdk` actual de Android 16+ es una decision fuerte que debera confirmarse frente al alcance comercial real.
+- [ ] La shell actual no expone JDK ni Gradle, asi que la validacion inicial sigue dependiendo del IDE local del usuario.
 
 ## Criterio de avance inmediato
 
@@ -47,4 +49,4 @@ Y, en el corto plazo tecnico, cuando:
 
 ## Siguiente hito recomendado
 
-- [ ] Verificar el bootstrap Android en Android Studio y luego definir el producto real en una pagina.
+- [ ] Definir el producto real en una pagina y convertir esa definicion en el siguiente corte de arquitectura y roadmap.

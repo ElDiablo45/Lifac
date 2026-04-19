@@ -1,4 +1,4 @@
 <resources>
-    <style name="Theme.Lifac" parent="android:Theme.DeviceDefault.DayNight.NoActionBar" />
+    <style name="Theme.Lifac" parent="android:Theme.DeviceDefault.NoActionBar" />
 </resources>
 

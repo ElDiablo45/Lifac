@@ -37,6 +37,7 @@
 - Aplicacion Android con `compileSdk` 37.
 - `targetSdk` 36.
 - `minSdk` 36.
+- AGP `9.1.1` con soporte Kotlin integrado.
 - Kotlin como lenguaje principal.
 - Soporte Kotlin integrado en AGP 9, sin aplicar `org.jetbrains.kotlin.android`.
 - Compose como toolkit de UI recomendado por Google.
@@ -76,6 +77,10 @@ Antes de ampliar la aplicacion real, validar como minimo:
 5. Convenciones de desarrollo, testing y despliegue.
 
 Despues de esa validacion, la implementacion deberia arrancar con un bootstrap minimo y verificable.
+
+Estado actual de validacion:
+
+- El usuario confirmo que la app ya compila y se ejecuta correctamente en un movil real.
 
 ## Fases de implementacion
 

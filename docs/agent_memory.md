@@ -9,6 +9,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El siguiente hito operativo es bootstrapear una app minima funcional tipo `Hello World`.
 - El entorno de shell actual no expone `java` ni `gradle` en `PATH`, por lo que la validacion completa desde terminal puede depender de Android Studio.
 - El repo ya contiene bootstrap Android real con wrapper, modulo `app`, tests base y UI Compose inicial.
+- El bootstrap ya fue validado por el usuario en Android Studio y ejecutado con exito en un movil real.
 
 ## Decisiones activas
 
@@ -18,10 +19,15 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
   - `minSdk = 36` para soportar solo Android 16 o superior,
   - `targetSdk = 36` para seguir apuntando formalmente a Android 16,
   - `compileSdk = 37` para compilar con el SDK mas reciente disponible.
+- Tooling base actual:
+  - AGP `9.1.1`,
+  - plugin `org.gradle.toolchains.foojay-resolver-convention` aplicado en `settings.gradle.kts`,
+  - `buildToolsVersion = "36.1.0"` fijado en el modulo `app`.
 - Stack base: Kotlin integrado en AGP 9, Jetpack Compose, Material 3, Gradle Kotlin DSL, version catalog y wrapper de Gradle.
 - Arquitectura inicial recomendada: una sola `Activity`, UI en Compose, estado expuesto desde `ViewModel` y flujo de datos unidireccional.
 - Namespace y `applicationId` iniciales: `io.github.eldiablo45.lifac`.
 - Se elimina el plugin `org.jetbrains.kotlin.android` porque AGP 9 ya aporta soporte Kotlin integrado.
+- El estado base funcional incluye tambien el tema actual `android:Theme.DeviceDefault.NoActionBar`.
 - La documentacion base se actualiza antes de cambios estructurales relevantes.
 - El proyecto mantiene memoria persistente basada en `AGENTS.md`, `docs/agent_memory.md`, `docs/app_spec.md` y `docs/roadmap.md`.
 
@@ -39,8 +45,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - El producto real aun no esta definido mas alla de ser una app Android nueva.
 - No hay informacion suficiente para fijar dominio de negocio, usuarios objetivo ni alcance funcional.
 - La shell actual no expone JDK ni Gradle, por lo que el primer sync y algunas validaciones podrian depender de Android Studio.
-- La compatibilidad exacta con herramientas locales instaladas por el usuario debe comprobarse en el primer sync del IDE.
-- Aun no esta verificado en este entorno que todas las dependencias resuelvan y compilen correctamente en tu Android Studio.
+- La validacion CLI sigue pendiente en este entorno, aunque el usuario ya confirmo sync, build y ejecucion correctos desde Android Studio.
 
 ## Contexto que no debe perderse
 
@@ -48,6 +53,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - En esta conversacion se define por primera vez la direccion tecnica del proyecto: Android nativo moderno.
 - El objetivo inmediato es crear una base fresca, actual y duradera para Android 16 con un primer `Hello World`.
 - La arquitectura debe mantenerse simple hasta que el producto real exija capas adicionales.
+- Este bootstrap ya debe considerarse el estado base estable desde el que arrancar el desarrollo del producto.
 
 ## Supuestos validos por ahora
 
