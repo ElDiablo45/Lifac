@@ -28,6 +28,7 @@ data class LifacAppUiState(
     val series: List<SeriesListItemUiState> = emptyList(),
     val draft: InvoiceDraftUiState = InvoiceDraftUiState(),
     val clientForm: ClientFormUiState = ClientFormUiState(),
+    val isPickingClientForDraft: Boolean = false,
 )
 
 data class EmitterProfileUiState(

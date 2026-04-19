@@ -13,6 +13,7 @@ Este documento conserva el contexto operativo que no debe perderse entre convers
 - La primera iteracion visual del producto ya reemplaza el `Hello World` por un shell navegable del MVP.
 - La seccion `Clientes` ya es la primera capacidad real persistida localmente.
 - `Nueva factura` ya puede seleccionar clientes reales guardados localmente.
+- El flujo de seleccion de cliente ya permite entrar en `Clientes` desde el borrador y volver al editor con el cliente elegido.
 
 ## Decisiones activas
 

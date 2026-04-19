@@ -17,6 +17,7 @@
 - [x] Sustitucion del `Hello World` por un shell navegable del MVP.
 - [x] Primera capacidad real persistida: alta y listado local de clientes.
 - [x] Conexion de `Nueva factura` con clientes reales guardados.
+- [x] Flujo util entre `Nueva factura` y `Clientes` para seleccionar cliente sin salir del contexto.
 
 ## En curso
 

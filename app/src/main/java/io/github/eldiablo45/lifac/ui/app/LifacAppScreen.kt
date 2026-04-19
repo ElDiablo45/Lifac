@@ -61,7 +61,9 @@ fun LifacAppScreen(
     onSaveClient: () -> Unit,
     onResetClientForm: () -> Unit,
     onDraftClientSelected: (String) -> Unit,
+    onPickClientForDraft: (String) -> Unit,
     onOpenClientsForDraft: () -> Unit,
+    onReturnToDraftEditor: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -154,6 +156,9 @@ fun LifacAppScreen(
                     onClientNotesChanged = onClientNotesChanged,
                     onSaveClient = onSaveClient,
                     onResetClientForm = onResetClientForm,
+                    isPickingClientForDraft = uiState.isPickingClientForDraft,
+                    onPickClientForDraft = onPickClientForDraft,
+                    onReturnToDraftEditor = onReturnToDraftEditor,
                     onPlaceholderAction = onPlaceholderAction,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -340,6 +345,9 @@ private fun ClientsScreen(
     onClientNotesChanged: (String) -> Unit,
     onSaveClient: () -> Unit,
     onResetClientForm: () -> Unit,
+    isPickingClientForDraft: Boolean,
+    onPickClientForDraft: (String) -> Unit,
+    onReturnToDraftEditor: () -> Unit,
     onPlaceholderAction: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -363,6 +371,12 @@ private fun ClientsScreen(
                         text = "Esta ya es la primera parte real de la app: los clientes se guardan localmente en el dispositivo. Los campos dudosos se mantienen opcionales por ahora.",
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (isPickingClientForDraft) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        FilledTonalButton(onClick = onReturnToDraftEditor) {
+                            Text("Volver a nueva factura")
+                        }
+                    }
                 }
             }
         }
@@ -471,7 +485,11 @@ private fun ClientsScreen(
         items(clients, key = { it.id }) { client ->
             ElevatedCard(
                 onClick = {
-                    onPlaceholderAction("Edicion detallada de cliente pendiente de la siguiente iteracion.")
+                    if (isPickingClientForDraft) {
+                        onPickClientForDraft(client.id)
+                    } else {
+                        onPlaceholderAction("Edicion detallada de cliente pendiente de la siguiente iteracion.")
+                    }
                 },
             ) {
                 ListItem(
@@ -492,10 +510,18 @@ private fun ClientsScreen(
                         )
                     },
                     trailingContent = {
-                        AssistChip(
-                            onClick = {},
-                            label = { Text(clientKindLabel(client.kind)) },
-                        )
+                        if (isPickingClientForDraft) {
+                            Text(
+                                text = "Seleccionar",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        } else {
+                            AssistChip(
+                                onClick = {},
+                                label = { Text(clientKindLabel(client.kind)) },
+                            )
+                        }
                     },
                 )
             }
@@ -1008,7 +1034,9 @@ private fun LifacAppScreenPreview() {
             onSaveClient = {},
             onResetClientForm = {},
             onDraftClientSelected = {},
+            onPickClientForDraft = {},
             onOpenClientsForDraft = {},
+            onReturnToDraftEditor = {},
             onPlaceholderAction = {},
         )
     }

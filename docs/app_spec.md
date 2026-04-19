@@ -306,4 +306,5 @@ Estado actual de validacion:
 - El flujo visual ya incluye placeholders para campos aun no cerrados.
 - `Clientes` ya funciona con persistencia local real.
 - `Nueva factura` ya puede seleccionar clientes reales guardados.
+- El flujo de cliente ya permite saltar a `Clientes` y regresar al borrador con la seleccion aplicada.
 - La persistencia local del resto de entidades y la generacion real de PDF siguen pendientes.

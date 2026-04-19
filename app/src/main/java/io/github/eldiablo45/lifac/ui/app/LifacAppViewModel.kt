@@ -27,6 +27,7 @@ class LifacAppViewModel(
     private val currentSection = MutableStateFlow(LifacSection.HOME)
     private val clientForm = MutableStateFlow(ClientFormUiState())
     private val selectedDraftClientId = MutableStateFlow<String?>(null)
+    private val pickingClientForDraft = MutableStateFlow(false)
     private val events = MutableSharedFlow<String>()
 
     val uiEvents = events.asSharedFlow()
@@ -36,7 +37,8 @@ class LifacAppViewModel(
         clientRepository.observeClients(),
         clientForm,
         selectedDraftClientId,
-    ) { section, storedClients, form, draftClientId ->
+        pickingClientForDraft,
+    ) { section, storedClients, form, draftClientId, isPickingClientForDraft ->
         val mappedClients = storedClients.map { storedClient ->
             ClientListItemUiState(
                 id = storedClient.id,
@@ -70,6 +72,7 @@ class LifacAppViewModel(
                 concepts = sampleDraftConcepts,
             ),
             clientForm = form,
+            isPickingClientForDraft = isPickingClientForDraft,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -86,13 +89,18 @@ class LifacAppViewModel(
 
     fun navigateTo(section: LifacSection) {
         currentSection.value = section
+        if (section != LifacSection.CLIENTS) {
+            pickingClientForDraft.value = false
+        }
     }
 
     fun openNewInvoice() {
+        pickingClientForDraft.value = false
         navigateTo(LifacSection.INVOICE_EDITOR)
     }
 
     fun leaveEditor() {
+        pickingClientForDraft.value = false
         navigateTo(LifacSection.HOME)
     }
 
@@ -100,11 +108,23 @@ class LifacAppViewModel(
         selectedDraftClientId.value = clientId
     }
 
+    fun pickClientAndReturnToDraft(clientId: String) {
+        selectedDraftClientId.value = clientId
+        pickingClientForDraft.value = false
+        navigateTo(LifacSection.INVOICE_EDITOR)
+    }
+
     fun openClientsForDraft() {
+        pickingClientForDraft.value = true
         navigateTo(LifacSection.CLIENTS)
         viewModelScope.launch {
             events.emit("Crea o revisa clientes y luego vuelve a Nueva factura para seleccionarlo.")
         }
+    }
+
+    fun returnToDraftEditor() {
+        pickingClientForDraft.value = false
+        navigateTo(LifacSection.INVOICE_EDITOR)
     }
 
     fun updateClientKind(kind: ClientType) {
@@ -147,9 +167,10 @@ class LifacAppViewModel(
         }
 
         viewModelScope.launch {
+            val newClientId = UUID.randomUUID().toString()
             clientRepository.upsertClient(
                 StoredClient(
-                    id = UUID.randomUUID().toString(),
+                    id = newClientId,
                     kind = normalizedForm.kind,
                     displayName = normalizedForm.displayName,
                     taxId = normalizedForm.taxId,
@@ -158,8 +179,19 @@ class LifacAppViewModel(
                     notes = normalizedForm.notes,
                 ),
             )
+            if (pickingClientForDraft.value) {
+                selectedDraftClientId.value = newClientId
+                pickingClientForDraft.value = false
+                currentSection.value = LifacSection.INVOICE_EDITOR
+            }
             clientForm.value = ClientFormUiState(kind = normalizedForm.kind)
-            events.emit("Cliente guardado localmente.")
+            events.emit(
+                if (currentSection.value == LifacSection.INVOICE_EDITOR) {
+                    "Cliente guardado y seleccionado en el borrador."
+                } else {
+                    "Cliente guardado localmente."
+                },
+            )
         }
     }
 
